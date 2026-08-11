@@ -35,6 +35,12 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:.5px solid var(--border);box-shadow:0 2px 12px rgba(122,52,6,.05);padding:0 1.75rem;display:flex;align-items:center;justify-content:space-between;height:56px}
 .nav-logo{font-family:'Noto Serif TC',serif;font-size:15px;font-weight:900;color:var(--text-2);text-decoration:none;white-space:nowrap;letter-spacing:.03em}
 .nav-logo span{color:var(--text-muted);font-size:10px;font-weight:400;margin-left:8px;letter-spacing:.08em;text-transform:uppercase}
+.nav-left{display:flex;align-items:center;gap:10px;min-width:0}
+.nav-home{display:flex;align-items:center;gap:7px;text-decoration:none;flex-shrink:0;transition:opacity .15s}
+.nav-home:hover{opacity:.65}
+.sy-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#7a3206,#e07b1f);color:#fff;font-family:'Noto Serif TC',serif;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.02em}
+.sy-text{font-family:'Noto Serif TC',serif;font-size:14px;font-weight:900;color:var(--text-2);letter-spacing:.03em;white-space:nowrap}
+.nav-div{width:1px;height:20px;background:var(--border);flex-shrink:0}
 .nav-links{display:flex;gap:1.4rem}
 .nav-links a{font-size:13px;color:var(--text-body);text-decoration:none;transition:color .15s}
 .nav-links a:hover{color:var(--text-2)}
@@ -170,6 +176,8 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
 @media (max-width:640px){
   .nav{padding:0 1rem}
   .nav-links{display:none}
+  .sy-text{display:none}
+  .nav-logo{font-size:13.5px}
   footer{flex-direction:column;text-align:center}
   .fi2{text-align:center}
 }
@@ -177,7 +185,14 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
 </head>
 <body>
 <nav class="nav">
-  <a class="nav-logo" href="#top">台灣大學羽球冬令營 <span>Stay Young</span></a>
+  <div class="nav-left">
+    <a class="nav-home" href="https://stayyounglab.com/" title="回到 Stay Young 首頁">
+      <span class="sy-mark">SY</span>
+      <span class="sy-text">Stay Young</span>
+    </a>
+    <span class="nav-div"></span>
+    <a class="nav-logo" href="#top">台灣大學羽球冬令營</a>
+  </div>
   <div class="nav-links">
     <a href="#about">介紹</a>
     <a href="#schedule">課程</a>
