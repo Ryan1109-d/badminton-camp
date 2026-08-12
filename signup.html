@@ -87,6 +87,9 @@ body{font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei"
 .notice-box{grid-column:1/-1;background:rgba(224,123,31,.05);border:.5px solid rgba(224,123,31,.25);border-radius:8px;padding:.95rem 1rem}
 .notice-title{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:4px}
 .notice-text{font-size:12px;color:#4a5b6c;line-height:1.7}
+.pc-row{display:flex;flex-direction:row;align-items:center;gap:22px;flex-wrap:wrap;margin-top:4px}
+.pc-opt{display:inline-flex;flex-direction:row;align-items:center;gap:6px;font-size:13px;color:var(--text-2);cursor:pointer;white-space:nowrap;margin:0}
+.pc-opt input{width:15px;height:15px;accent-color:var(--accent);margin:0;flex:none}
 .fnote{font-size:11px;color:var(--text-muted);line-height:1.65;grid-column:1/-1}
 .fnote a{color:var(--accent)}
 .fsub{grid-column:1/-1;background:linear-gradient(135deg,var(--accent-deep),var(--accent));color:#fff;border:none;border-radius:7px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}
@@ -285,6 +288,17 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
           </div>
         </label>
       </div>
+      <div class="fg full">
+        <label for="notes">其他想告訴我們的</label>
+        <input type="text" id="notes" name="notes" placeholder="例如：食物或藥物過敏、特殊健康狀況、需要我們留意的事">
+      </div>
+      <div class="fg full">
+        <label>照片使用同意 <span class="req">*</span>　<span style="color:var(--text-faint);font-weight:400">營隊將拍攝活動花絮照片，作為活動紀錄與營隊網站使用</span></label>
+        <div class="pc-row">
+          <label class="pc-opt"><input type="radio" name="photoConsent" value="同意" checked>同意</label>
+          <label class="pc-opt"><input type="radio" name="photoConsent" value="不同意">不同意（拍攝時將迴避）</label>
+        </div>
+      </div>
       <div class="notice-box">
         <div class="notice-title">報名後流程說明</div>
         <div class="notice-text">送出報名後，您會先收到「報名確認信」。待報名人數達開班標準並確認開班後，我們才會寄送「繳費通知」，屆時再依通知的帳號完成轉帳繳費即可。開班前不會收取任何費用。</div>
@@ -436,6 +450,8 @@ form.addEventListener('submit', async (e) => {
       const m = document.querySelector('input[name="mealType"]:checked');
       return `代訂午餐（${m ? m.value : ''}）`;
     })(),
+    notes: document.getElementById('notes').value.trim() || '—',
+    photoConsent: document.querySelector('input[name="photoConsent"]:checked').value,
     groupMembers: ['gm1','gm2','gm3','gm4','gm5'].map(id => document.getElementById(id).value.trim()).filter(Boolean).join('、') || '—',
     submittedAt: new Date().toISOString()
   };

@@ -3,8 +3,8 @@
  * （與足球營完全分開：請用新的 Google Sheet + 新的 Apps Script 部署）
  *
  * 部署步驟：
- * 1. Google Sheet 第一列欄位標題（共 18 欄，與下方 appendRow 順序一致）：
- *    報名時間 | 梯次 | 時段 | 學員姓名 | 性別 | 年齡 | 年級 | 收信信箱 | 緊急聯絡人 | 緊急聯絡人電話 | 繳款人姓名 | 繳款人電話 | 繳款人信箱 | 優惠身份 | 午餐 | 狀態 | 團報成員 | 衣服尺寸
+ * 1. Google Sheet 第一列欄位標題（共 20 欄，與下方 appendRow 順序一致）：
+ *    報名時間 | 梯次 | 時段 | 學員姓名 | 性別 | 年齡 | 年級 | 收信信箱 | 緊急聯絡人 | 緊急聯絡人電話 | 繳款人姓名 | 繳款人電話 | 繳款人信箱 | 優惠身份 | 午餐 | 狀態 | 團報成員 | 衣服尺寸 | 備註 | 照片同意
  * 2. Sheet 上方選 擴充功能 → Apps Script，貼上本檔案全部內容
  * 3. 修改下方 CONFIG 的 SHEET_ID（網址中 /d/ 和 /edit 之間那串）
  * 4. 部署 → 新增部署作業 → 類型選「網頁應用程式」
@@ -29,7 +29,8 @@ const COL = {
   TIME: 0, SESSION: 1, SLOT: 2, STUDENT: 3, GENDER: 4, AGE: 5, GRADE: 6,
   EMAIL: 7, EMG_NAME: 8, EMG_PHONE: 9,
   PAYER_NAME: 10, PAYER_PHONE: 11, PAYER_EMAIL: 12,
-  DISCOUNT: 13, LUNCH: 14, STATUS: 15, GROUP: 16, SHIRT: 17
+  DISCOUNT: 13, LUNCH: 14, STATUS: 15, GROUP: 16, SHIRT: 17,
+  NOTES: 18, PHOTO: 19
 };
 function doPost(e) {
   try {
@@ -79,7 +80,9 @@ function doPost(e) {
       data.lunch,
       status,
       data.groupMembers || '—',
-      data.shirtSize
+      data.shirtSize,
+      data.notes || '—',
+      data.photoConsent || '同意'
     ]);
     // ---- 寄信 ----
     if (isWaitlist) {
@@ -106,7 +109,7 @@ function sendConfirmEmail(data) {
 緊急聯絡人：${data.emgName}（${data.emgPhone}）
 優惠身份：${data.discount}
 午餐：${data.lunch}
-衣服尺寸：${data.shirtSize}
+衣服尺寸：${data.shirtSize}${data.notes && data.notes !== '—' ? '\n備註：' + data.notes : ''}
 ── 接下來的流程 ──
 1. 報名人數達開班標準並確認開班後，我們會寄送「繳費通知」至繳款人信箱
 2. 依通知的帳號完成轉帳繳費後即確認錄取
