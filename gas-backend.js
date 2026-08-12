@@ -22,7 +22,17 @@ const CONFIG = {
   CAPACITY: 50,                          // 正取上限（三時段合計）
   CAMP_NAME: '台灣大學羽球冬令營 2027',
   CAMP_DATE: '2027/1/25（一）– 1/29（五）',
-  REPLY_EMAIL: 'stayyoung985@gmail.com'
+  REPLY_EMAIL: 'stayyoung985@gmail.com',
+  // 早鳥截止（含當日）。此日期前完成報名者，不限身份適用優惠價
+  EARLY_BIRD_DEADLINE: '2026-11-30T23:59:59+08:00',
+  // ⚠️ 收款資訊：以下為測試值。只要任何一項還是「（測試）」開頭，
+  //    sendPaymentNotice() 會拒絕寄給家長，只寄預覽給自己。
+  PAYMENT: {
+    BANK: '（測試）台灣銀行 004',
+    ACCOUNT_NAME: '（測試）戶名尚未設定',
+    ACCOUNT_NO: '（測試）0000000000000',
+    DEADLINE_DAYS: 7
+  }
 };
 // 欄位索引（0-based，對應 Sheet 欄位順序）
 const COL = {
@@ -158,4 +168,118 @@ function jsonResponse(obj) {
  */
 function doGet(e) {
   return jsonResponse({ status: 'ok', message: 'API alive' });
+}
+
+// ══════════════════════════════════════════
+// 繳費通知信
+// NOTICE_COL：Sheet 第 21 欄（第一列標題請加「繳費通知」）
+// ══════════════════════════════════════════
+const NOTICE_COL = 21;
+
+/** 收款資訊是否還是測試值 */
+function paymentIsPlaceholder() {
+  const p = CONFIG.PAYMENT;
+  return [p.BANK, p.ACCOUNT_NAME, p.ACCOUNT_NO]
+    .some(v => String(v).indexOf('（測試）') === 0);
+}
+
+/** 依報名時間、時段、優惠身份、午餐計算應繳金額 */
+function calcAmount(row) {
+  const regTime = row[COL.TIME];
+  const early = (regTime instanceof Date) &&
+                regTime <= new Date(CONFIG.EARLY_BIRD_DEADLINE);
+  const d = String(row[COL.DISCOUNT] || '');
+  const discounted = early || d === '團報' || d === '台大教職員';
+  const fullDay = String(row[COL.SLOT] || '').indexOf('整天') >= 0;
+  const base = fullDay ? (discounted ? 7000 : 7600)
+                       : (discounted ? 3500 : 4000);
+  const meal = String(row[COL.LUNCH] || '').indexOf('代訂') >= 0 ? 500 : 0;
+  return { base: base, meal: meal, total: base + meal,
+           slotLabel: fullDay ? '整天班' : '半天班',
+           label: discounted ? (early ? '早鳥優惠價' : '優惠價') : '原價' };
+}
+
+/** 組繳費通知信內容 */
+function buildPaymentBody(studentName, session, slot, amt) {
+  const p = CONFIG.PAYMENT;
+  const due = new Date();
+  due.setDate(due.getDate() + p.DEADLINE_DAYS);
+  const dueStr = Utilities.formatDate(due, 'Asia/Taipei', 'yyyy/MM/dd');
+  return `您好：
+
+${CONFIG.CAMP_NAME} 已達開班標準，確定開班！
+以下是 ${studentName} 的繳費資訊，敬請於期限內完成轉帳。
+
+── 費用明細 ──
+梯次：${session}
+時段：${slot}（${amt.slotLabel}）
+營隊費用：NT$ ${amt.base}（${amt.label}）${amt.meal ? '\n代訂午餐：NT$ ' + amt.meal + '（五天）' : ''}
+應繳總額：NT$ ${amt.total}
+
+── 轉帳資訊 ──
+銀行：${p.BANK}
+戶名：${p.ACCOUNT_NAME}
+帳號：${p.ACCOUNT_NO}
+繳費期限：${dueStr}（收到通知後 ${p.DEADLINE_DAYS} 天內）
+
+── 完成轉帳後 ──
+請直接回覆本信，告知「轉帳帳號末五碼」與「轉帳日期」，
+我們核帳後會回覆確認，即完成報名程序。
+
+如需延長繳費期限或有任何問題，請直接回覆本信與我們聯繫。
+
+Stay Young 台灣大學羽球冬令營
+${CONFIG.REPLY_EMAIL}`;
+}
+
+/** 預覽：只寄一封範例信給自己，不讀 Sheet、不動任何資料 */
+function previewPaymentNotice() {
+  const amt = { base: 7000, meal: 500, total: 7500,
+                slotLabel: '整天班', label: '早鳥優惠價' };
+  const body = buildPaymentBody('王小華（範例）', '第一梯 2027/1/25–1/29',
+                                '整天班（09:00–17:00）', amt);
+  MailApp.sendEmail({
+    to: CONFIG.REPLY_EMAIL,
+    subject: `【預覽】${CONFIG.CAMP_NAME} 繳費通知信`,
+    body: (paymentIsPlaceholder()
+            ? '⚠️ 目前收款資訊仍是測試值，正式寄送會被擋下。\n\n───────────\n\n'
+            : '✅ 收款資訊已設定，正式寄送不會被擋。\n\n───────────\n\n') + body,
+    replyTo: CONFIG.REPLY_EMAIL,
+    name: 'Stay Young 台灣大學羽球冬令營'
+  });
+  return '預覽信已寄至 ' + CONFIG.REPLY_EMAIL;
+}
+
+/** 正式寄送：挑出「正取」且尚未寄過繳費通知的人，寄信並回填時間 */
+function sendPaymentNotice() {
+  if (paymentIsPlaceholder()) {
+    throw new Error('收款資訊仍是測試值，已中止。請先把 CONFIG.PAYMENT 換成真實資料，' +
+                    '或改用 previewPaymentNotice() 預覽。');
+  }
+  const sheet = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(CONFIG.SHEET_NAME);
+  const rows = sheet.getDataRange().getValues();
+  let sent = 0, skipped = 0;
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (String(r[COL.STATUS]).trim() !== '正取') { skipped++; continue; }
+    if (String(r[NOTICE_COL - 1] || '').trim() !== '') { skipped++; continue; }
+    const payerEmail = String(r[COL.PAYER_EMAIL] || '').trim();
+    if (!payerEmail) { skipped++; continue; }
+    const amt = calcAmount(r);
+    const body = buildPaymentBody(r[COL.STUDENT], r[COL.SESSION], r[COL.SLOT], amt);
+    const opts = {
+      to: payerEmail,
+      subject: `【${CONFIG.CAMP_NAME}】確定開班・繳費通知`,
+      body: body,
+      replyTo: CONFIG.REPLY_EMAIL,
+      name: 'Stay Young 台灣大學羽球冬令營'
+    };
+    const notifyEmail = String(r[COL.EMAIL] || '').trim();
+    if (notifyEmail && notifyEmail !== payerEmail) opts.cc = notifyEmail;
+    MailApp.sendEmail(opts);
+    sheet.getRange(i + 1, NOTICE_COL)
+         .setValue(Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy/MM/dd HH:mm'));
+    sent++;
+  }
+  return '已寄送 ' + sent + ' 封，略過 ' + skipped + ' 筆。';
 }
