@@ -17,7 +17,7 @@
  * - 第 51 位起 → 狀態「候補」，寄候補通知信
  */
 const CONFIG = {
-  SHEET_ID: 'YOUR_SHEET_ID_HERE',       // TODO: 換成實際 Sheet ID
+  SHEET_ID: '1ztz8LzvzZByXfTueenDHMJqn05anQUxJi1y9-hibLWs',       // TODO: 換成實際 Sheet ID
   SHEET_NAME: '報名名單',                 // 分頁名稱
   CAPACITY: 50,                          // 正取上限（三時段合計）
   CAMP_NAME: '台灣大學羽球冬令營 2027',
@@ -31,7 +31,7 @@ const CONFIG = {
     BANK: '（測試）台灣銀行 004',
     ACCOUNT_NAME: '（測試）戶名尚未設定',
     ACCOUNT_NO: '（測試）0000000000000',
-    DEADLINE_DAYS: 5
+    DEADLINE_DAYS: 7
   }
 };
 // 欄位索引（0-based，對應 Sheet 欄位順序）
@@ -226,9 +226,7 @@ ${CONFIG.CAMP_NAME} 已達開班標準，確定開班！
 請直接回覆本信，告知「轉帳帳號末五碼」與「轉帳日期」，
 我們核帳後會回覆確認，即完成報名程序。
 
-── 逾期提醒 ──
-逾期未完成繳費者，名額將由候補學員遞補，敬請留意繳費期限。
-如有特殊狀況需要協調，請於期限前回覆本信與我們聯繫。
+如需延長繳費期限或有任何問題，請直接回覆本信與我們聯繫。
 
 Stay Young 台灣大學羽球冬令營
 ${CONFIG.REPLY_EMAIL}`;
