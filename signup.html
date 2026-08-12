@@ -87,6 +87,8 @@ body{font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei"
 .notice-box{grid-column:1/-1;background:rgba(224,123,31,.05);border:.5px solid rgba(224,123,31,.25);border-radius:8px;padding:.95rem 1rem}
 .notice-title{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:4px}
 .notice-text{font-size:12px;color:#4a5b6c;line-height:1.7}
+.hp-field{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .pc-row{display:flex;flex-direction:row;align-items:center;gap:22px;flex-wrap:wrap;margin-top:4px}
 .pc-opt{display:inline-flex;flex-direction:row;align-items:center;gap:6px;font-size:13px;color:var(--text-2);cursor:pointer;white-space:nowrap;margin:0}
 .pc-opt input{width:15px;height:15px;accent-color:var(--accent);margin:0;flex:none}
@@ -130,7 +132,7 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
 <div class="reg-wrap">
   <div class="reg-box">
     <div class="breadcrumb"><a href="index.html">← 返回首頁</a></div>
-    <div class="reg-title">報名表單</div>
+    <h1 class="reg-title">報名表單</h1>
     <p class="reg-sub">填妥以下資料並送出，即完成報名登記。</p>
     <div class="flow-strip">
       <div class="flow-step"><div class="flow-num">1</div><div class="flow-txt">送出報名<br>收到確認信</div></div>
@@ -139,6 +141,10 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
       <div class="flow-step"><div class="flow-num">4</div><div class="flow-txt">收到行前信<br>準備開課</div></div>
     </div>
     <form class="form-g" id="signupForm" novalidate>
+      <div class="hp-field" aria-hidden="true">
+        <label for="website">網站</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
       <div class="fg full">
         <label for="session">報名梯次 <span class="req">*</span></label>
         <select id="session" name="session" required>
@@ -259,11 +265,11 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
         <div class="gb-title">團報學員名單</div>
         <div class="gb-hint">請填寫同行其他學員姓名。<strong>提醒：每位學員皆需各自填寫一份報名表。</strong></div>
         <div class="gb-grid">
-          <input type="text" class="gb-input" id="gm1" placeholder="學員 1 姓名">
-          <input type="text" class="gb-input" id="gm2" placeholder="學員 2 姓名">
-          <input type="text" class="gb-input" id="gm3" placeholder="學員 3 姓名">
-          <input type="text" class="gb-input" id="gm4" placeholder="學員 4 姓名">
-          <input type="text" class="gb-input" id="gm5" placeholder="學員 5 姓名">
+          <label class="vh" for="gm1">團報學員 1 姓名</label><input type="text" class="gb-input" id="gm1" placeholder="學員 1 姓名">
+          <label class="vh" for="gm2">團報學員 2 姓名</label><input type="text" class="gb-input" id="gm2" placeholder="學員 2 姓名">
+          <label class="vh" for="gm3">團報學員 3 姓名</label><input type="text" class="gb-input" id="gm3" placeholder="學員 3 姓名">
+          <label class="vh" for="gm4">團報學員 4 姓名</label><input type="text" class="gb-input" id="gm4" placeholder="學員 4 姓名">
+          <label class="vh" for="gm5">團報學員 5 姓名</label><input type="text" class="gb-input" id="gm5" placeholder="學員 5 姓名">
         </div>
       </div>
       <div class="lunch-box" id="lunchBox" style="display:none">
@@ -289,15 +295,32 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
         </label>
       </div>
       <div class="fg full">
+        <label>學員健康狀況 <span class="req">*</span>　<span style="color:var(--text-faint);font-weight:400">為了孩子的安全，請務必據實填寫</span></label>
+        <div class="pc-row">
+          <label class="pc-opt"><input type="radio" name="healthStatus" value="無特殊狀況">無特殊狀況</label>
+          <label class="pc-opt"><input type="radio" name="healthStatus" value="有特殊狀況">有，請說明</label>
+        </div>
+      </div>
+      <div class="fg full" id="healthDetailWrap" style="display:none">
+        <label for="healthDetail">健康狀況說明 <span class="req">*</span></label>
+        <input type="text" id="healthDetail" name="healthDetail" placeholder="例如：花生過敏、氣喘、蠶豆症、需定時服藥、注意力不足等">
+      </div>
+      <div class="fg full">
         <label for="notes">其他想告訴我們的</label>
-        <input type="text" id="notes" name="notes" placeholder="例如：食物或藥物過敏、特殊健康狀況、需要我們留意的事">
+        <input type="text" id="notes" name="notes" placeholder="其他希望教練留意的事項（選填）">
       </div>
       <div class="fg full">
         <label>照片使用同意 <span class="req">*</span>　<span style="color:var(--text-faint);font-weight:400">營隊將拍攝活動花絮照片，作為活動紀錄與營隊網站使用</span></label>
         <div class="pc-row">
-          <label class="pc-opt"><input type="radio" name="photoConsent" value="同意" checked>同意</label>
+          <label class="pc-opt"><input type="radio" name="photoConsent" value="同意">同意</label>
           <label class="pc-opt"><input type="radio" name="photoConsent" value="不同意">不同意（拍攝時將迴避）</label>
         </div>
+      </div>
+      <div class="fg full">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-size:13px;color:var(--text-2)">
+          <input type="checkbox" id="medicalConsent" name="medicalConsent" style="width:16px;height:16px;accent-color:var(--accent);margin:0;flex:none">
+          <span>學員於活動中發生緊急傷病時，同意營隊人員先行採取必要之急救或送醫措施，並同時聯繫家長 <span class="req">*</span></span>
+        </label>
       </div>
       <div class="notice-box">
         <div class="notice-title">報名後流程說明</div>
@@ -375,6 +398,13 @@ document.querySelectorAll('input[name="lunch"]').forEach(r => {
       document.querySelector('input[name="lunch"]:checked').value === '代訂午餐' ? 'flex' : 'none';
   });
 });
+// 健康狀況說明展開聯動
+document.querySelectorAll('input[name="healthStatus"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('healthDetailWrap').style.display =
+      document.querySelector('input[name="healthStatus"]:checked').value === '有特殊狀況' ? 'flex' : 'none';
+  });
+});
 // 團報名單顯示聯動
 document.getElementById('discount').addEventListener('change', (e) => {
   document.getElementById('groupBox').style.display = e.target.value === '團報' ? 'block' : 'none';
@@ -401,6 +431,31 @@ form.addEventListener('submit', async (e) => {
     const el = document.getElementById(id);
     if (el.value.trim() && !fn(el.value)) { el.classList.add('err'); valid = false; }
   });
+  // 健康狀況必選
+  const hs = document.querySelector('input[name="healthStatus"]:checked');
+  if (!hs) {
+    msgBox.textContent = '請選擇學員健康狀況。';
+    msgBox.classList.add('fail');
+    return;
+  }
+  if (hs.value === '有特殊狀況' && !document.getElementById('healthDetail').value.trim()) {
+    document.getElementById('healthDetail').classList.add('err');
+    msgBox.textContent = '請填寫健康狀況說明。';
+    msgBox.classList.add('fail');
+    return;
+  }
+  // 照片同意必選
+  if (!document.querySelector('input[name="photoConsent"]:checked')) {
+    msgBox.textContent = '請選擇是否同意照片使用。';
+    msgBox.classList.add('fail');
+    return;
+  }
+  // 緊急醫療授權必勾
+  if (!document.getElementById('medicalConsent').checked) {
+    msgBox.textContent = '請勾選緊急醫療授權。';
+    msgBox.classList.add('fail');
+    return;
+  }
   // 整天班且代訂午餐 → 必選葷素
   const isFull = slotChecked && slotChecked.value.indexOf('整天') === 0 || (slotChecked && slotChecked.value.startsWith('整天'));
   if (slotChecked && slotChecked.value.startsWith('整天') &&
@@ -452,6 +507,10 @@ form.addEventListener('submit', async (e) => {
     })(),
     notes: document.getElementById('notes').value.trim() || '—',
     photoConsent: document.querySelector('input[name="photoConsent"]:checked').value,
+    healthStatus: document.querySelector('input[name="healthStatus"]:checked').value,
+    healthDetail: document.getElementById('healthDetail').value.trim() || '—',
+    medicalConsent: document.getElementById('medicalConsent').checked,
+    website: document.getElementById('website').value,
     groupMembers: ['gm1','gm2','gm3','gm4','gm5'].map(id => document.getElementById(id).value.trim()).filter(Boolean).join('、') || '—',
     submittedAt: new Date().toISOString()
   };
@@ -474,12 +533,11 @@ form.addEventListener('submit', async (e) => {
       window.location.href = 'index.html';
       return;
     } else {
-      throw new Error(result.message || '送出失敗');
+      alert('送出失敗：' + (result.message || '請稍後再試，或直接來信 stayyoung985@gmail.com 報名。'));
+      return;
     }
   } catch (err) {
-    alert(err.message === '此學員已使用相同信箱報名過'
-      ? '送出失敗：此學員已使用相同信箱報名過。'
-      : '送出失敗，請稍後再試，或直接來信 stayyoung985@gmail.com 報名。');
+    alert('送出失敗，請稍後再試，或直接來信 stayyoung985@gmail.com 報名。');
   } finally {
     btn.disabled = false;
     btn.textContent = '送出報名 →';

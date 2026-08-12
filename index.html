@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台灣大學羽球冬令營 2027｜Stay Young</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- 9 月正式公開時移除這一行 -->
+<meta name="robots" content="noindex">
 <meta name="description" content="2027 寒假台灣大學羽球冬令營，專業教練 1:10 分階教學，五天全天密集訓練。1/25–1/29，台大體育館，早上／下午／整天三時段。">
 <style>
 :root{
@@ -81,6 +83,14 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .sl{font-size:.8rem;color:var(--blue);font-weight:700;letter-spacing:.25em;text-transform:uppercase;margin-bottom:.75rem}
 .st{font-family:'Noto Serif TC',serif;font-size:clamp(1.7rem,3.8vw,2.4rem);font-weight:900;margin-bottom:.9rem;line-height:1.25;letter-spacing:.04em;color:var(--text-2)}
 .ss{font-size:15px;color:var(--text-body);line-height:1.85;max-width:520px}
+.venue-info{margin-top:1.7rem;background:var(--card);border:.5px solid var(--border);border-radius:12px;overflow:hidden}
+.vi-row{display:flex;gap:1rem;padding:.9rem 1.3rem;border-bottom:.5px solid var(--border-soft)}
+.vi-row:last-child{border-bottom:none}
+.vi-label{flex:0 0 56px;font-size:12.5px;color:var(--text-muted)}
+.vi-val{font-size:14px;color:var(--text-2);line-height:1.7}
+.vi-link{color:var(--blue);text-decoration:none;font-weight:700}
+.vi-link:hover{text-decoration:underline}
+.v-note{font-size:12.5px;color:var(--text-muted);margin-top:.9rem;line-height:1.7}
 .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:1.7rem}
 .fc{background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:1.4rem;position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
 .fc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--navy)}
@@ -196,6 +206,8 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
   </div>
   <div class="nav-links">
     <a href="#about">介紹</a>
+    <a href="#venue">場地</a>
+    <a href="#coaches">教練</a>
     <a href="#schedule">課程</a>
     <a href="#daily">時程</a>
     <a href="#pricing">收費</a>
@@ -243,6 +255,31 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
   </div>
 </section>
 
+<section class="sec alt" id="venue">
+  <div class="sec-inner">
+    <div class="reveal">
+      <div class="sl">場地介紹</div>
+      <div class="st">訓練場地</div>
+      <p class="ss">課程於國立臺灣大學體育館室內球場進行，不受天候影響，通風與照明良好。<!-- TODO: 補上確切館名與樓層 --></p>
+    </div>
+    <div class="venue-info reveal">
+      <div class="vi-row"><span class="vi-label">地點</span><span class="vi-val">國立臺灣大學　體育館室內球場</span></div>
+      <div class="vi-row"><span class="vi-label">地址</span><span class="vi-val">臺北市大安區羅斯福路四段 1 號<!-- TODO: 若為特定館舍請補完整地址 --></span></div>
+      <div class="vi-row"><span class="vi-label">地圖</span><span class="vi-val"><a class="vi-link" href="https://www.google.com/maps/search/?api=1&query=%E5%9C%8B%E7%AB%8B%E8%87%BA%E7%81%A3%E5%A4%A7%E5%AD%B8%E9%AB%94%E8%82%B2%E9%A4%A8" target="_blank" rel="noopener">開啟 Google 地圖 →</a></span></div>
+    </div>
+    <p class="v-note reveal">確切集合地點與報到位置，將於開課前一週以 email 與家長群組通知。</p>
+  </div>
+</section>
+<section class="sec" id="coaches">
+  <div class="sec-inner">
+    <div class="reveal">
+      <div class="sl">教練介紹</div>
+      <div class="st">誰帶您的孩子</div>
+      <!-- TODO: 換成真實教練姓名、頭銜與簡介；照片需先取得教練本人同意 -->
+      <p class="ss">本營隊由具備羽球專項訓練背景的教練團隊帶領，維持 1:10 的教練學員比，依實際程度分階教學。<strong>本梯次教練名單將於開課前一週於官網與家長群組公告。</strong></p>
+    </div>
+  </div>
+</section>
 <section class="sec alt" id="schedule">
   <span class="sec-glow" style="bottom:-160px;left:-160px"></span>
   <div class="sec-inner">
@@ -337,6 +374,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
       <div class="faq-i reveal"><div class="faq-q">需要自備羽球裝備嗎？</div><div class="faq-a">建議穿著運動服與室內運動鞋。球拍可自備，營隊亦備有球拍供使用，羽球由營隊提供。</div></div>
       <div class="faq-i reveal"><div class="faq-q">優惠可以一起用嗎？</div><div class="faq-a">早鳥、台大教職員、團報三種優惠不可疊加，符合任一即享同一優惠價。</div></div>
       <div class="faq-i reveal"><div class="faq-q">報名後何時繳費？</div><div class="faq-a">報名送出即完成登記並收到確認信。達開班門檻並確認開班後，才會寄送繳費通知（轉帳），完成繳費即錄取。</div></div>
+      <div class="faq-i reveal"><div class="faq-q">沒收到確認信怎麼辦？</div><div class="faq-a">先麻煩您到「垃圾郵件」或「促銷內容」資料夾找一下，系統信有時會被自動分類過去。如果找過還是沒有，很可能是報名時信箱有誤，請直接來信 stayyoung985@gmail.com 告訴我們孩子的姓名，我們會幫您確認報名狀態並補寄一次，不用擔心報名沒成功。</div></div>
       <div class="faq-i reveal"><div class="faq-q">額滿後如何候補？</div><div class="faq-a">名額額滿後，後續報名自動列入候補。有名額釋出時，以 email 通知候補者，先完成繳費者優先。</div></div>
     </div>
   </div>
@@ -345,7 +383,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
 <section class="cta-band">
   <div class="reveal">
     <div class="st">準備好讓孩子上場了嗎？</div>
-    <p>目標招收 40 名、上限 50 名。早鳥 11/30 截止，報名截止 2027/1/17（日），額滿候補。</p>
+    <p>限額 50 名，滿 15 人即確定開班。早鳥 11/30 截止，報名截止 2027/1/17（日），額滿候補。</p>
     <a class="btn-blue" href="signup.html">前往報名 →</a>
   </div>
 </section>
