@@ -83,6 +83,20 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .sl{font-size:.8rem;color:var(--blue);font-weight:700;letter-spacing:.25em;text-transform:uppercase;margin-bottom:.75rem}
 .st{font-family:'Noto Serif TC',serif;font-size:clamp(1.7rem,3.8vw,2.4rem);font-weight:900;margin-bottom:.9rem;line-height:1.25;letter-spacing:.04em;color:var(--text-2)}
 .ss{font-size:15px;color:var(--text-body);line-height:1.85;max-width:520px}
+.coach-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:1.7rem}
+.coach-card{background:var(--card);border:.5px solid var(--border);border-radius:14px;padding:1.5rem 1.4rem;transition:transform .2s,border-color .2s,box-shadow .2s}
+.coach-card:hover{transform:translateY(-4px);border-color:var(--blue);box-shadow:0 14px 32px rgba(122,52,6,.12)}
+.coach-top{display:flex;align-items:center;gap:.9rem;margin-bottom:1rem}
+.coach-avatar{width:58px;height:58px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-size:1.35rem;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--navy),var(--blue));overflow:hidden}
+.coach-avatar img{width:100%;height:100%;object-fit:cover}
+.coach-name{font-family:'Noto Serif TC',serif;font-size:1.15rem;font-weight:900;color:var(--text-2);line-height:1.3}
+.coach-title{font-size:12px;color:var(--blue);margin-top:3px;font-weight:700}
+.coach-meta{font-size:12.5px;color:var(--text-body);line-height:2;padding:.75rem 0;border-top:.5px solid var(--border-soft);border-bottom:.5px solid var(--border-soft)}
+.coach-meta b{color:var(--text-muted);font-weight:400;display:inline-block;min-width:64px}
+.coach-ach{list-style:none;margin-top:.8rem;padding:0}
+.coach-ach li{font-size:12.5px;color:var(--text-body);line-height:1.7;padding-left:1.1rem;position:relative;margin-bottom:.3rem}
+.coach-ach li::before{content:'';position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--blue-bright)}
+.coach-note{margin-top:1.4rem;font-size:12.5px;color:var(--text-muted);line-height:1.8}
 .venue-info{margin-top:1.7rem;background:var(--card);border:.5px solid var(--border);border-radius:12px;overflow:hidden}
 .vi-row{display:flex;gap:1rem;padding:.9rem 1.3rem;border-bottom:.5px solid var(--border-soft)}
 .vi-row:last-child{border-bottom:none}
@@ -275,9 +289,60 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
     <div class="reveal">
       <div class="sl">教練介紹</div>
       <div class="st">誰帶您的孩子</div>
-      <!-- TODO: 換成真實教練姓名、頭銜與簡介；照片需先取得教練本人同意 -->
-      <p class="ss">本營隊由具備羽球專項訓練背景的教練團隊帶領，維持 1:10 的教練學員比，依實際程度分階教學。<strong>本梯次教練名單將於開課前一週於官網與家長群組公告。</strong></p>
+      <p class="ss">本營隊由具備羽球專項訓練背景的教練團隊帶領，維持 1:10 的教練學員比，依實際程度分階教學。實際梯次教練配置以開課當週公告為準。</p>
     </div>
+    <!-- ══════════════════════════════════════════════════════════════════
+         ⚠️⚠️⚠️  以下四張教練卡全部是「範例假資料」，僅供版面預覽  ⚠️⚠️⚠️
+         姓名、球齡、教學經驗、執照、比賽成績全部是虛構的。
+         對外公開前必須整批換成真實教練資料，或整個區塊移除。
+         每個名字都帶「（範例）」後綴，就是為了避免不小心上線。
+         ══════════════════════════════════════════════════════════════════ -->
+    <div class="coach-grid">
+      <div class="coach-card reveal">
+        <div class="coach-top">
+          <div class="coach-avatar">王</div>
+          <div><div class="coach-name">王小明（範例）</div><div class="coach-title">甲組球員．台大羽球校隊</div></div>
+        </div>
+        <div class="coach-meta"><b>球齡</b>12 年<br><b>教學經驗</b>3 年<br><b>執照</b>中華民國羽協 C 級教練證</div>
+        <ul class="coach-ach">
+          <li>（範例）全國羽球排名賽　男乙雙第一</li>
+          <li>（範例）全大運男子團體第三</li>
+        </ul>
+      </div>
+      <div class="coach-card reveal d1">
+        <div class="coach-top">
+          <div class="coach-avatar">李</div>
+          <div><div class="coach-name">李美華（範例）</div><div class="coach-title">甲組球員．C 級教練證</div></div>
+        </div>
+        <div class="coach-meta"><b>球齡</b>15 年<br><b>教學經驗</b>6 年<br><b>經歷</b>國小羽球隊指導教練</div>
+        <ul class="coach-ach">
+          <li>（範例）全國中正盃女子單打第二</li>
+          <li>（範例）大專盃女子雙打冠軍</li>
+        </ul>
+      </div>
+      <div class="coach-card reveal d2">
+        <div class="coach-top">
+          <div class="coach-avatar">陳</div>
+          <div><div class="coach-name">陳建宏（範例）</div><div class="coach-title">台大羽球校隊．體育系</div></div>
+        </div>
+        <div class="coach-meta"><b>球齡</b>10 年<br><b>教學經驗</b>2 年<br><b>專長</b>基礎步法與體能訓練</div>
+        <ul class="coach-ach">
+          <li>（範例）全中運高中男雙第四</li>
+        </ul>
+      </div>
+      <div class="coach-card reveal d3">
+        <div class="coach-top">
+          <div class="coach-avatar">林</div>
+          <div><div class="coach-name">林雅婷（範例）</div><div class="coach-title">兒童專項教練．B 級教練證</div></div>
+        </div>
+        <div class="coach-meta"><b>球齡</b>18 年<br><b>教學經驗</b>8 年<br><b>專長</b>學齡兒童啟蒙教學</div>
+        <ul class="coach-ach">
+          <li>（範例）縣市代表隊選訓教練</li>
+          <li>（範例）全國羽球錦標賽女雙第三</li>
+        </ul>
+      </div>
+    </div>
+    <p class="coach-note">※ 教練群採輪派制配置，實際帶隊教練將於開課前一週於官網與家長群組公告。</p>
   </div>
 </section>
 <section class="sec alt" id="schedule">
@@ -347,7 +412,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
     </div>
     <div class="promo-note reveal">
       <b>三種優惠，擇一享優惠價（不可疊加）：</b>早鳥（11/30 前報名自動適用）／台大教職員（本人或子女）／團體報名（5 人以上，各自完成報名）。<br>
-      <b>開班門檻 15 人</b>，確認開班後才寄送繳費通知，未達門檻不收取任何費用。<b>最終報名截止 1/17。</b>
+      <b>開班門檻 15 人</b>，確認開班後才寄送繳費通知，未達門檻不收取任何費用。<b>最終報名截止 1/10。</b>
     </div>
     <div class="refund-box reveal">
       <div class="refund-title">退費規則（繳費後）</div>
@@ -383,7 +448,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
 <section class="cta-band">
   <div class="reveal">
     <div class="st">準備好讓孩子上場了嗎？</div>
-    <p>限額 50 名，滿 15 人即確定開班。早鳥 11/30 截止，報名截止 2027/1/17（日），額滿候補。</p>
+    <p>限額 50 名，滿 15 人即確定開班。早鳥 11/30 截止，報名截止 2027/1/10（日），額滿候補。</p>
     <a class="btn-blue" href="signup.html">前往報名 →</a>
   </div>
 </section>
