@@ -173,7 +173,11 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .refund-note{font-size:11px;color:var(--text-faint);margin-top:.85rem;line-height:1.65}
 .faq-list{max-width:600px;margin-top:1.7rem}
 .faq-i{border-bottom:.5px solid var(--border);padding:1.05rem 0}
-.faq-q{font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:700;color:var(--text-2);margin-bottom:6px}
+.faq-q{width:100%;background:none;border:none;text-align:left;padding:1.05rem 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:700;color:var(--text-2)}
+.faq-arrow{color:var(--blue);font-size:1.1rem;font-weight:400;flex-shrink:0;transition:transform .25s}
+.faq-i.open .faq-arrow{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;padding:0}
+.faq-i.open .faq-a{max-height:420px;padding-bottom:1.05rem}
 .faq-a{font-size:14px;color:var(--text-body);line-height:1.75}
 /* ===== CTA band ===== */
 .cta-band{padding:4rem 1.75rem;text-align:center;background:linear-gradient(135deg,var(--navy-deep) 0%,var(--blue) 100%);position:relative;overflow:hidden}
@@ -230,7 +234,6 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
   <div class="nav-right"><a class="nav-cta" href="signup.html">立即報名</a></div>
 </nav>
 <div class="top-banner">
-  <div class="banner-placeholder"><span>橫幅照片準備中（上線前替換實拍）</span></div>
 </div>
 <section class="hero" id="top">
   <div class="hero-glow"></div>
@@ -256,7 +259,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
   <div class="sec-inner">
     <div class="reveal">
       <div class="sl">營隊介紹</div>
-      <div class="st">五天全天，紮實學球</div>
+      <div class="st">五天密集，紮實學球</div>
       <p class="ss">無論是第一次拿拍的零基礎孩子，還是已有底子想更進一步的小球員，教練當天依實際程度分階，1:10 小組帶領，五天看得見進步。</p>
     </div>
     <div class="fgrid">
@@ -288,7 +291,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
   <div class="sec-inner">
     <div class="reveal">
       <div class="sl">教練介紹</div>
-      <div class="st">誰帶您的孩子</div>
+      <div class="st">專業，用心帶領</div>
       <p class="ss">本營隊由具備羽球專項訓練背景的教練團隊帶領，維持 1:10 的教練學員比，依實際程度分階教學。實際梯次教練配置以開課當週公告為準。</p>
     </div>
     <!-- ══════════════════════════════════════════════════════════════════
@@ -380,22 +383,6 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
   </div>
 </section>
 
-<section class="sec alt" id="gallery">
-  <div class="sec-inner">
-    <div class="reveal">
-      <div class="sl">活動花絮</div>
-      <div class="st">球場上的每一刻</div>
-      <p class="ss">實際活動照片即將更新。</p>
-    </div>
-    <!-- TODO: 換成實際活動照片（Cloudinary 上傳後填入 img src） -->
-    <div class="gallery-grid">
-      <div class="g-tile reveal"><span>照片準備中</span></div>
-      <div class="g-tile reveal d1"><span>照片準備中</span></div>
-      <div class="g-tile reveal d2"><span>照片準備中</span></div>
-      <div class="g-tile reveal d3"><span>照片準備中</span></div>
-    </div>
-  </div>
-</section>
 
 <section class="sec" id="pricing">
   <span class="sec-glow" style="bottom:-180px;right:-160px"></span>
@@ -434,13 +421,13 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
       <div class="st">常見問題</div>
     </div>
     <div class="faq-list">
-      <div class="faq-i reveal"><div class="faq-q">孩子完全沒打過羽球可以參加嗎？</div><div class="faq-a">可以。現場依實際程度分階，零基礎從握拍、步法開始，教練依進度調整，不用擔心跟不上。</div></div>
-      <div class="faq-i reveal"><div class="faq-q">半天班和整天班差在哪裡？</div><div class="faq-a">半天（早上或下午，3 小時）適合作息彈性的家庭；整天班含午休、共 6 小時訓練，最完整，也是最完整的寒假托育方案。</div></div>
-      <div class="faq-i reveal"><div class="faq-q">需要自備羽球裝備嗎？</div><div class="faq-a">建議穿著運動服與室內運動鞋。球拍可自備，營隊亦備有球拍供使用，羽球由營隊提供。</div></div>
-      <div class="faq-i reveal"><div class="faq-q">優惠可以一起用嗎？</div><div class="faq-a">早鳥、台大教職員、團報三種優惠不可疊加，符合任一即享同一優惠價。</div></div>
-      <div class="faq-i reveal"><div class="faq-q">報名後何時繳費？</div><div class="faq-a">報名送出即完成登記並收到確認信。達開班門檻並確認開班後，才會寄送繳費通知（轉帳），完成繳費即錄取。</div></div>
-      <div class="faq-i reveal"><div class="faq-q">沒收到確認信怎麼辦？</div><div class="faq-a">先麻煩您到「垃圾郵件」或「促銷內容」資料夾找一下，系統信有時會被自動分類過去。如果找過還是沒有，很可能是報名時信箱有誤，請直接來信 stayyoung985@gmail.com 告訴我們孩子的姓名，我們會幫您確認報名狀態並補寄一次，不用擔心報名沒成功。</div></div>
-      <div class="faq-i reveal"><div class="faq-q">額滿後如何候補？</div><div class="faq-a">名額額滿後，後續報名自動列入候補。有名額釋出時，以 email 通知候補者，先完成繳費者優先。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">孩子完全沒打過羽球可以參加嗎？<span class="faq-arrow">＋</span></button><div class="faq-a">可以。現場依實際程度分階，零基礎從握拍、步法開始，教練依進度調整，不用擔心跟不上。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">半天班和整天班差在哪裡？<span class="faq-arrow">＋</span></button><div class="faq-a">半天（早上或下午，3 小時）適合作息彈性的家庭；整天班含午休、共 6 小時訓練，最完整，也是最完整的寒假托育方案。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">需要自備羽球裝備嗎？<span class="faq-arrow">＋</span></button><div class="faq-a">建議穿著運動服與室內運動鞋。球拍可自備，營隊亦備有球拍供使用，羽球由營隊提供。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">優惠可以一起用嗎？<span class="faq-arrow">＋</span></button><div class="faq-a">早鳥、台大教職員、團報三種優惠不可疊加，符合任一即享同一優惠價。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">報名後何時繳費？<span class="faq-arrow">＋</span></button><div class="faq-a">報名送出即完成登記並收到確認信。達開班門檻並確認開班後，才會寄送繳費通知（轉帳），完成繳費即錄取。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">沒收到確認信怎麼辦？<span class="faq-arrow">＋</span></button><div class="faq-a">先麻煩您到「垃圾郵件」或「促銷內容」資料夾找一下，系統信有時會被自動分類過去。如果找過還是沒有，很可能是報名時信箱有誤，請直接來信 stayyoung985@gmail.com 告訴我們孩子的姓名，我們會幫您確認報名狀態並補寄一次，不用擔心報名沒成功。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">額滿後如何候補？<span class="faq-arrow">＋</span></button><div class="faq-a">名額額滿後，後續報名自動列入候補。有名額釋出時，以 email 通知候補者，先完成繳費者優先。</div></div>
     </div>
   </div>
 </section>
@@ -467,6 +454,12 @@ const io = new IntersectionObserver((entries) => {
   entries.forEach(e => { e.target.classList.toggle('visible', e.isIntersecting); });
 }, { threshold: 0.15 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+// FAQ 手風琴
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.parentElement.classList.toggle('open');
+  });
+});
 </script>
 </body>
 </html>
