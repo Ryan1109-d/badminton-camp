@@ -97,7 +97,18 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .coach-ach li{font-size:12.5px;color:var(--text-body);line-height:1.7;padding-left:1.1rem;position:relative;margin-bottom:.3rem}
 .coach-ach li::before{content:'';position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--blue-bright)}
 .coach-note{margin-top:1.4rem;font-size:12.5px;color:var(--text-muted);line-height:1.8}
-.venue-info{margin-top:1.7rem;background:var(--card);border:.5px solid var(--border);border-radius:12px;overflow:hidden}
+.venue-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:1.7rem;align-items:start}
+.venue-item{margin:0}
+.venue-item .g-tile{aspect-ratio:16/10;border-radius:12px;overflow:hidden;display:block;width:100%;cursor:zoom-in}
+.venue-item .g-tile img{width:100%;height:100%;object-fit:cover;display:block;box-shadow:0 8px 24px rgba(122,52,6,.12);border-radius:12px}
+.v-cap{font-size:12.5px;color:var(--text-muted);text-align:center;margin-top:8px;letter-spacing:.04em}
+.lightbox{position:fixed;inset:0;z-index:300;background:rgba(30,16,4,.93);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:2rem;cursor:zoom-out}
+.lightbox.open{display:flex}
+.lightbox img{max-width:min(1200px,94vw);max-height:88vh;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.5);display:block}
+.lightbox-close{position:absolute;top:18px;right:22px;background:none;border:none;color:#fff;font-size:2.2rem;line-height:1;cursor:pointer;opacity:.85;padding:.2rem .6rem}
+.lightbox-cap{position:absolute;bottom:26px;left:0;right:0;text-align:center;color:#f2ddc4;font-size:13px;letter-spacing:.04em}
+@media (max-width:640px){.venue-grid{grid-template-columns:1fr}}
+.venue-info{margin-top:1.4rem;background:var(--card);border:.5px solid var(--border);border-radius:12px;overflow:hidden}
 .vi-row{display:flex;gap:1rem;padding:.9rem 1.3rem;border-bottom:.5px solid var(--border-soft)}
 .vi-row:last-child{border-bottom:none}
 .vi-label{flex:0 0 56px;font-size:12.5px;color:var(--text-muted)}
@@ -282,6 +293,16 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
       <div class="st">訓練場地</div>
       <p class="ss">課程於國立臺灣大學綜合體育館室內球場進行，木地板場地、照明充足，不受天候影響。</p>
     </div>
+    <div class="venue-grid">
+      <figure class="venue-item reveal">
+        <div class="g-tile zoomable"><img src="images/venue-court-1.jpg" alt="台大綜合體育館羽球場"></div>
+        <figcaption class="v-cap">綜合體育館・羽球場全景</figcaption>
+      </figure>
+      <figure class="venue-item reveal d1">
+        <div class="g-tile zoomable"><img src="images/venue-court-2.jpg" alt="台大綜合體育館場地"></div>
+        <figcaption class="v-cap">木地板場地・照明充足</figcaption>
+      </figure>
+    </div>
     <div class="venue-info reveal">
       <div class="vi-row"><span class="vi-label">地點</span><span class="vi-val">國立臺灣大學　綜合體育館</span></div>
       <div class="vi-row"><span class="vi-label">地址</span><span class="vi-val">臺北市大安區羅斯福路四段 1 號<!-- TODO: 若為特定館舍請補完整地址 --></span></div>
@@ -432,6 +453,11 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
   </div>
 </section>
 
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" type="button" aria-label="關閉">&times;</button>
+  <img id="lightboxImg" src="" alt="">
+  <div class="lightbox-cap" id="lightboxCap"></div>
+</div>
 <footer>
   <div>
     <div class="fl">Stay Young <span style="color:var(--blue-steel);font-weight:400">羽你同行</span></div>
@@ -446,6 +472,19 @@ const io = new IntersectionObserver((entries) => {
   entries.forEach(e => { e.target.classList.toggle('visible', e.isIntersecting); });
 }, { threshold: 0.15 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+// 場地照片放大檢視
+const lb=document.getElementById('lightbox'),lbImg=document.getElementById('lightboxImg'),lbCap=document.getElementById('lightboxCap');
+document.querySelectorAll('.zoomable img').forEach(img=>{
+  img.addEventListener('click',()=>{
+    lbImg.src=img.src; lbImg.alt=img.alt;
+    const fig=img.closest('figure'), cap=fig&&fig.querySelector('.v-cap');
+    lbCap.textContent=cap?cap.textContent:img.alt;
+    lb.classList.add('open'); document.body.style.overflow='hidden';
+  });
+});
+function closeLightbox(){lb.classList.remove('open');document.body.style.overflow='';}
+lb.addEventListener('click',closeLightbox);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
 // FAQ 手風琴
 document.querySelectorAll('.faq-q').forEach(btn => {
   btn.addEventListener('click', () => {
