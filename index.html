@@ -4,15 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Google tag (gtag.js) -->
-<!-- 內部流量開關：在任一頁網址後加 ?ga_off=1 造訪一次，這台裝置就不再送出 GA 資料（存在 localStorage，換網路/換 IP 都有效）。要恢復：改加 ?ga_on=1 -->
+<!-- 內部流量開關：在任一頁網址後加 ?ga_off=1 造訪一次，這台瀏覽器在「四個子網域」都不再送出 GA 資料。要恢復：改加 ?ga_on=1
+     旗標存成根網域 cookie（localStorage 不跨子網域，只作為輔助） -->
 <script>
 (function(){
-  try{
-    var q = window.location.search;
-    if (q.indexOf('ga_off=1') > -1) localStorage.setItem('sy_ga_off','1');
-    if (q.indexOf('ga_on=1')  > -1) localStorage.removeItem('sy_ga_off');
-    if (localStorage.getItem('sy_ga_off') === '1') return;   // 內部裝置，不載入 GA
-  }catch(e){ /* localStorage 被擋時視為一般訪客，照常統計 */ }
+  var KEY = 'sy_ga_off';
+  var DOMAIN = '.stayyounglab.com';
+
+  function setFlag(on){
+    try{ on ? localStorage.setItem(KEY,'1') : localStorage.removeItem(KEY); }catch(e){}
+    document.cookie = KEY + '=' + (on ? '1' : '') +
+      '; domain=' + DOMAIN + '; path=/; max-age=' + (on ? 63072000 : 0) + '; SameSite=Lax';
+  }
+  function hasFlag(){
+    if (new RegExp('(^|;\\s*)' + KEY + '=1').test(document.cookie)) return true;
+    try{ return localStorage.getItem(KEY) === '1'; }catch(e){ return false; }
+  }
+
+  var q = window.location.search;
+  if (q.indexOf('ga_off=1') > -1) setFlag(true);
+  if (q.indexOf('ga_on=1')  > -1) setFlag(false);
+  if (hasFlag()) return;   // 內部裝置，不載入 GA
 
   var s = document.createElement('script');
   s.async = true;
