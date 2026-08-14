@@ -17,7 +17,7 @@
  * - 第 51 位起 → 狀態「候補」，寄候補通知信
  */
 const CONFIG = {
-  SHEET_ID: '1ztz8LzvzZByXfTueenDHMJqn05anQUxJi1y9-hibLWs',       // TODO: 換成實際 Sheet ID
+  SHEET_ID: 'YOUR_SHEET_ID_HERE',       // TODO: 換成實際 Sheet ID（只在 Apps Script 填，不要 commit）
   SHEET_NAME: '報名名單',                 // 分頁名稱
   CAPACITY: 50,                          // 正取上限（三時段合計）
   CAMP_NAME: '台灣大學羽球冬令營 2027',
