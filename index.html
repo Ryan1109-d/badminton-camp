@@ -67,7 +67,7 @@
   --text:#1c2733;
   --text-2:#22303f;
   --text-body:#5a6b7c;
-  --text-muted:#7b8a99;
+  --text-muted:#5f7182;
   --text-faint:#9aa7b3;
   --navy:#a8480a;
   --navy-deep:#7a3206;
@@ -307,7 +307,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
     <div class="hmi"><div class="hml">日期</div><div class="hmv">1/25 – 1/29</div></div>
     <div class="hmi"><div class="hml">對象</div><div class="hmv">6 – 15 歲</div></div>
     <div class="hmi"><div class="hml">時段</div><div class="hmv">早上／下午／整天</div></div>
-    <div class="hmi"><div class="hml">地點</div><div class="hmv">國立臺灣大學<span style="display:block;font-size:10px;color:var(--blue);font-weight:700;margin-top:1px">綜合體育館室內場地</span></div></div>
+    <div class="hmi"><div class="hml">地點</div><div class="hmv">國立台灣大學<span style="display:block;font-size:10px;color:var(--blue);font-weight:700;margin-top:1px">綜合體育館室內場地</span></div></div>
   </div>
   <div class="hero-btns">
     <a class="btn-blue" href="signup.html">立即報名 →</a>
@@ -328,7 +328,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
       <div class="fc reveal"><div class="ft">依程度分階</div><div class="fd">當天依實際程度分組，零基礎與有底子都在對的難度學習</div></div>
       <div class="fc reveal d1"><div class="ft">1:8–10 小組</div><div class="fd">教練學員比 1:8–10，內向或第一次接觸也被充分照顧</div></div>
       <div class="fc reveal d2"><div class="ft">台大室內場地</div><div class="fd">綜合體育館室內球場，不受天候影響，安全通風燈光足</div></div>
-      <div class="fc reveal d3"><div class="ft">全程責任保險</div><div class="fd">營期投保責任保險，現場備基礎傷處理</div></div>
+      <div class="fc reveal d3"><div class="ft">全程責任保險</div><div class="fd">營期投保責任保險。</div></div>
       <div class="fc reveal"><div class="ft">紀念運動衫</div><div class="fd">結業發放 Stay Young 紀念衫，報名時填尺寸</div></div>
     </div>
   </div>
@@ -339,7 +339,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
     <div class="reveal">
       <div class="sl">場地介紹</div>
       <div class="st">訓練場地</div>
-      <p class="ss">課程於國立臺灣大學綜合體育館室內球場進行，木地板場地、照明充足，不受天候影響。</p>
+      <p class="ss">課程於國立台灣大學綜合體育館室內球場進行，木地板場地、照明充足，不受天候影響。</p>
     </div>
     <div class="venue-grid">
       <figure class="venue-item reveal">
@@ -352,8 +352,8 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
       </figure>
     </div>
     <div class="venue-info reveal">
-      <div class="vi-row"><span class="vi-label">地點</span><span class="vi-val">國立臺灣大學　綜合體育館</span></div>
-      <div class="vi-row"><span class="vi-label">地址</span><span class="vi-val">臺北市大安區羅斯福路四段 1 號<!-- TODO: 若為特定館舍請補完整地址 --></span></div>
+      <div class="vi-row"><span class="vi-label">地點</span><span class="vi-val">國立台灣大學　綜合體育館</span></div>
+      <div class="vi-row"><span class="vi-label">地址</span><span class="vi-val">台北市大安區羅斯福路四段 1 號<!-- TODO: 若為特定館舍請補完整地址 --></span></div>
       <div class="vi-row"><span class="vi-label">地圖</span><span class="vi-val"><a class="vi-link" href="https://www.google.com/maps/search/?api=1&query=%E5%9C%8B%E7%AB%8B%E8%87%BA%E7%81%A3%E5%A4%A7%E5%AD%B8%E7%B6%9C%E5%90%88%E9%AB%94%E8%82%B2%E9%A4%A8" target="_blank" rel="noopener">開啟 Google 地圖 →</a></span></div>
     </div>
     <p class="v-note reveal">確切集合地點與報到位置，將於開課前一週以 email 與家長群組通知。</p>
@@ -509,7 +509,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
 <footer>
   <div>
     <div class="fl">Stay Young <span style="color:var(--blue-steel);font-weight:400">羽你同行</span></div>
-    <div class="fs">台灣大學羽球冬令營 2027 · 場地合作：國立臺灣大學</div>
+    <div class="fs">台灣大學羽球冬令營 2027 · 場地合作：國立台灣大學</div>
   </div>
   <div class="fi2">
     聯繫我們：stayyoung985@gmail.com<br>0979-032-572
@@ -517,7 +517,16 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
 </footer>
 <script>
 const io = new IntersectionObserver((entries) => {
-  entries.forEach(e => { e.target.classList.toggle('visible', e.isIntersecting); });
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      e.target.addEventListener('transitionend', () => {
+        e.target.classList.remove('reveal', 'visible');
+        e.target.style.opacity = '';
+        e.target.style.transform = '';
+      }, { once: true });
+    }
+  });
 }, { threshold: 0.15 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 // 早鳥截止後，價格呈現自動改以原價為主
@@ -546,10 +555,17 @@ document.querySelectorAll('.zoomable img').forEach(img=>{
 function closeLightbox(){lb.classList.remove('open');document.body.style.overflow='';}
 lb.addEventListener('click',closeLightbox);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
-// FAQ 手風琴
-document.querySelectorAll('.faq-q').forEach(btn => {
+// FAQ 手風琴（含 aria-expanded 狀態同步，讓螢幕閱讀器知道展開與否）
+document.querySelectorAll('.faq-q').forEach((btn, i) => {
+  const panel = btn.nextElementSibling;
+  btn.setAttribute('aria-expanded', 'false');
+  if (panel) {
+    if (!panel.id) panel.id = 'faq-a-' + i;
+    btn.setAttribute('aria-controls', panel.id);
+  }
   btn.addEventListener('click', () => {
-    btn.parentElement.classList.toggle('open');
+    const open = btn.parentElement.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 });
 </script>
