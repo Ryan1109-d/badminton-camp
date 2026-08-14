@@ -81,7 +81,7 @@ function doPost(e) {
         message: '這筆報名剛剛已經送出成功了，請稍候幾分鐘再試，或直接來信確認報名狀態。' });
     }
     // ---- 基本驗證 ----
-    const required = ['session', 'slot', 'studentName', 'gender', 'age', 'grade', 'email',
+    const required = ['session', 'slot', 'studentName', 'gender', 'age', 'email',
                       'emgName', 'emgPhone', 'payerName', 'payerPhone', 'payerEmail',
                       'discount', 'lunch', 'shirtSize', 'healthStatus', 'photoConsent'];
     for (const key of required) {
@@ -111,7 +111,7 @@ function doPost(e) {
       studentName:  safeCell(data.studentName, 20),
       gender:       safeCell(data.gender, 20),
       age:          safeCell(data.age, 20),
-      grade:        safeCell(data.grade, 20),
+      grade:        safeCell(data.grade, 20) || '—',
       email:        safeCell(data.email, 254),
       emgName:      safeCell(data.emgName, 20),
       emgPhone:     safeCell(data.emgPhone, 15),
@@ -184,7 +184,7 @@ function sendConfirmEmail(data) {
 營隊：${CONFIG.CAMP_NAME}
 梯次：${safeText(data.session,40)}
 時段：${safeText(data.slot,40)}
-學員：${safeText(data.studentName,20)}（${safeText(data.grade,20)}，${safeText(data.gender,20)}，${safeText(data.age,20)} 歲）
+學員：${safeText(data.studentName,20)}（${safeText(data.gender,20)}，${safeText(data.age,20)} 歲）
 緊急聯絡人：${safeText(data.emgName,20)}（${safeText(data.emgPhone,15)}）
 優惠身份：${safeText(data.discount,20)}
 午餐：${safeText(data.lunch,30)}

@@ -35,7 +35,7 @@ body{font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei"
 .nav-div{width:1px;height:20px;background:var(--border);flex-shrink:0}
 .nav-year{font-size:12px;color:var(--text-muted)}
 .reg-wrap{padding:2.75rem 1.75rem 4rem;min-height:calc(100vh - 56px - 80px);background:linear-gradient(160deg,#5c2604 0%,#8f3d08 55%,#b35b12 100%)}
-.reg-box{max-width:560px;margin:0 auto}
+.reg-box{max-width:600px;margin:0 auto;background:#fff;border-radius:16px;padding:2rem 1.9rem;box-shadow:0 16px 48px rgba(60,26,4,.3)}
 .breadcrumb{font-size:12px;color:var(--text-faint);margin-bottom:1.3rem}
 .breadcrumb a{color:var(--accent);text-decoration:none}
 .reg-title{font-size:23px;font-weight:600;margin-bottom:.4rem}
@@ -194,21 +194,6 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
       <div class="fg">
         <label for="age">學員年齡 <span class="req">*</span></label>
         <input type="number" id="age" name="age" min="6" max="15" placeholder="10" required>
-      </div>
-      <div class="fg">
-        <label for="grade">學員年級 <span class="req">*</span></label>
-        <select id="grade" name="grade" required>
-          <option value="">請選擇</option>
-          <option value="小一">小學一年級</option>
-          <option value="小二">小學二年級</option>
-          <option value="小三">小學三年級</option>
-          <option value="小四">小學四年級</option>
-          <option value="小五">小學五年級</option>
-          <option value="小六">小學六年級</option>
-          <option value="國一">國中一年級</option>
-          <option value="國二">國中二年級</option>
-          <option value="國三">國中三年級</option>
-        </select>
       </div>
       <div class="fg full">
         <label for="shirtSize">衣服尺寸 <span class="req">*</span></label>
@@ -417,7 +402,7 @@ form.addEventListener('submit', async (e) => {
   msgBox.className = 'msg';
   let valid = true;
   const requiredText = ['studentName','age','email','emgName','emgPhone','payerName','payerPhone','payerEmail'];
-  const requiredSelect = ['session','gender','grade','shirtSize'];
+  const requiredSelect = ['session','gender','shirtSize'];
   [...requiredText, ...requiredSelect].forEach(id => {
     const el = document.getElementById(id);
     el.classList.remove('err');
@@ -490,7 +475,6 @@ form.addEventListener('submit', async (e) => {
     studentName: document.getElementById('studentName').value.trim(),
     gender: document.getElementById('gender').value,
     age: document.getElementById('age').value,
-    grade: document.getElementById('grade').value,
     shirtSize: document.getElementById('shirtSize').value,
     email: document.getElementById('email').value.trim(),
     emgName: document.getElementById('emgName').value.trim(),
