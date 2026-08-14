@@ -54,7 +54,7 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .top-banner img{display:block;width:100%;height:clamp(133px,23vw,253px);object-fit:cover;object-position:center top;filter:saturate(.9) brightness(.96)}
 .banner-placeholder{width:100%;height:clamp(133px,23vw,253px);background:linear-gradient(135deg,var(--blue-soft),#fff);border-bottom:1px dashed var(--border);display:flex;align-items:center;justify-content:center}
 .banner-placeholder span{font-size:13px;color:var(--text-faint)}
-.hero{padding:5.5rem 1.75rem 5rem;text-align:center;border-bottom:none;position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(30,22,14,.88) 0%,rgba(74,50,26,.70) 42%,rgba(26,19,12,.92) 100%),url('images/hero-court.jpg') center 45%/cover no-repeat}
+.hero{padding:5.5rem 1.75rem 5rem;text-align:center;border-bottom:none;position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(30,22,14,.88) 0%,rgba(74,50,26,.70) 42%,rgba(26,19,12,.92) 100%),url('images/hero-court.jpg') center 52%/cover no-repeat}
 .hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 80% 65% at 50% 0%,rgba(224,123,31,.08) 0%,transparent 68%);pointer-events:none}
 .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:56px 56px;pointer-events:none}
 .shuttle{font-size:3.2rem;margin-bottom:1rem;animation:float 3s ease-in-out infinite;position:relative;z-index:1}
@@ -156,8 +156,9 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .pdesc{font-size:13px;color:var(--text-body);margin-bottom:5px;position:relative}
 .pnum{font-family:'Noto Serif TC',serif;font-size:2rem;font-weight:900;color:var(--blue);position:relative}
 .pnum .plabel{font-size:13px;font-family:'Noto Sans TC',sans-serif;font-weight:700;color:var(--text-muted);margin-right:4px}
-.porig{font-size:15px;color:var(--text-body);margin-top:5px;position:relative;font-weight:500}
-.porig s{color:var(--text-faint);text-decoration-thickness:1.5px}
+.porig{font-size:14.5px;color:var(--text-muted);margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);position:relative;font-weight:500}
+.porig b{color:var(--text-2);font-weight:700;margin-left:2px}
+.pcond{font-size:12px;color:var(--blue);margin-top:8px;font-weight:700;line-height:1.6}
 .punit{font-size:13px;color:var(--text-faint);font-weight:400}
 .pnote{font-size:12px;color:var(--text-muted);margin-top:6px;line-height:1.6;position:relative}
 .ph-spacer{height:25px}
@@ -279,12 +280,12 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
     <div class="reveal">
       <div class="sl">場地介紹</div>
       <div class="st">訓練場地</div>
-      <p class="ss">課程於國立臺灣大學體育館室內球場進行，不受天候影響，通風與照明良好。<!-- TODO: 補上確切館名與樓層 --></p>
+      <p class="ss">課程於國立臺灣大學綜合體育館室內球場進行，木地板場地、照明充足，不受天候影響。</p>
     </div>
     <div class="venue-info reveal">
-      <div class="vi-row"><span class="vi-label">地點</span><span class="vi-val">國立臺灣大學　體育館室內球場</span></div>
+      <div class="vi-row"><span class="vi-label">地點</span><span class="vi-val">國立臺灣大學　綜合體育館</span></div>
       <div class="vi-row"><span class="vi-label">地址</span><span class="vi-val">臺北市大安區羅斯福路四段 1 號<!-- TODO: 若為特定館舍請補完整地址 --></span></div>
-      <div class="vi-row"><span class="vi-label">地圖</span><span class="vi-val"><a class="vi-link" href="https://www.google.com/maps/search/?api=1&query=%E5%9C%8B%E7%AB%8B%E8%87%BA%E7%81%A3%E5%A4%A7%E5%AD%B8%E9%AB%94%E8%82%B2%E9%A4%A8" target="_blank" rel="noopener">開啟 Google 地圖 →</a></span></div>
+      <div class="vi-row"><span class="vi-label">地圖</span><span class="vi-val"><a class="vi-link" href="https://www.google.com/maps/search/?api=1&query=%E5%9C%8B%E7%AB%8B%E8%87%BA%E7%81%A3%E5%A4%A7%E5%AD%B8%E7%B6%9C%E5%90%88%E9%AB%94%E8%82%B2%E9%A4%A8" target="_blank" rel="noopener">開啟 Google 地圖 →</a></span></div>
     </div>
     <p class="v-note reveal">確切集合地點與報到位置，將於開課前一週以 email 與家長群組通知。</p>
   </div>
@@ -384,9 +385,9 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
       <p class="ss">半天適合作息彈性的家庭；整天班訓練最完整，也是最完整的寒假托育方案。每張方案都同時標示優惠價與原價。</p>
     </div>
     <div class="pgrid">
-      <div class="pc reveal"><span class="ptag ghost">半天</span><div class="pdesc">早上班　09:00–12:00</div><div class="pnum"><span class="plabel">優惠價</span>$3,600</div><div class="porig">原價 <s>$3,900</s></div><div class="pnote">每人・五天</div></div>
-      <div class="pc hi reveal d1"><span class="ptag">最完整 · 整天</span><div class="pdesc">整天班　09:00–17:00（含午休）</div><div class="pnum"><span class="plabel">優惠價</span>$7,200</div><div class="porig">原價 <s>$7,800</s></div><div class="pnote">每人・五天</div></div>
-      <div class="pc reveal d2"><span class="ptag ghost">半天</span><div class="pdesc">下午班　14:00–17:00</div><div class="pnum"><span class="plabel">優惠價</span>$3,600</div><div class="porig">原價 <s>$3,900</s></div><div class="pnote">每人・五天</div></div>
+      <div class="pc reveal"><span class="ptag ghost">半天</span><div class="pdesc">早上班　09:00–12:00</div><div class="pnum"><span class="plabel">優惠價</span>$3,600</div><div class="porig">原價 <b>$3,900</b></div><div class="pcond">11/30 前報名即享優惠價</div><div class="pnote">每人・五天</div></div>
+      <div class="pc hi reveal d1"><span class="ptag">最完整 · 整天</span><div class="pdesc">整天班　09:00–17:00（含午休）</div><div class="pnum"><span class="plabel">優惠價</span>$7,200</div><div class="porig">原價 <b>$7,800</b></div><div class="pcond">11/30 前報名即享優惠價</div><div class="pnote">每人・五天</div></div>
+      <div class="pc reveal d2"><span class="ptag ghost">半天</span><div class="pdesc">下午班　14:00–17:00</div><div class="pnum"><span class="plabel">優惠價</span>$3,600</div><div class="porig">原價 <b>$3,900</b></div><div class="pcond">11/30 前報名即享優惠價</div><div class="pnote">每人・五天</div></div>
     </div>
     <div class="promo-note reveal">
       <b>三種優惠，擇一享優惠價（不可疊加）：</b>早鳥（11/30 前報名自動適用）／台大教職員子女／團體報名（5 人以上，各自完成報名）。<br>
