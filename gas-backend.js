@@ -357,7 +357,8 @@ function sendPaymentNotice() {
 // 安裝：Apps Script 左側「觸發條件」→ 新增 → dailyBackup／時間驅動／日計時器／23:00–00:00
 // ══════════════════════════════════════════
 function dailyBackup() {
-  const FOLDER_NAME = 'StayYoung 報名備份';
+  // 資料夾必須與足球站分開，否則兩站的 slice(14) 會互刪對方的備份，保留天數砍半
+  const FOLDER_NAME = 'StayYoung 報名備份_羽球';
   const it = DriveApp.getFoldersByName(FOLDER_NAME);
   const folder = it.hasNext() ? it.next() : DriveApp.createFolder(FOLDER_NAME);
   const src = DriveApp.getFileById(CONFIG.SHEET_ID);
