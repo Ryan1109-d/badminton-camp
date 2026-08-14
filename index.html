@@ -54,7 +54,7 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .top-banner img{display:block;width:100%;height:clamp(133px,23vw,253px);object-fit:cover;object-position:center top;filter:saturate(.9) brightness(.96)}
 .banner-placeholder{width:100%;height:clamp(133px,23vw,253px);background:linear-gradient(135deg,var(--blue-soft),#fff);border-bottom:1px dashed var(--border);display:flex;align-items:center;justify-content:center}
 .banner-placeholder span{font-size:13px;color:var(--text-faint)}
-.hero{padding:5.5rem 1.75rem 5rem;text-align:center;border-bottom:none;position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(30,22,14,.88) 0%,rgba(74,50,26,.70) 42%,rgba(26,19,12,.92) 100%),url('images/hero-court.jpg') center 52%/cover no-repeat}
+.hero{padding:5.5rem 1.75rem 5rem;text-align:center;border-bottom:none;position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(30,22,14,.88) 0%,rgba(74,50,26,.70) 42%,rgba(26,19,12,.92) 100%),url('images/hero-court.jpg') center 45%/cover no-repeat}
 .hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 80% 65% at 50% 0%,rgba(224,123,31,.08) 0%,transparent 68%);pointer-events:none}
 .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:56px 56px;pointer-events:none}
 .shuttle{font-size:3.2rem;margin-bottom:1rem;animation:float 3s ease-in-out infinite;position:relative;z-index:1}
@@ -406,12 +406,12 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
       <p class="ss">半天適合作息彈性的家庭；整天班訓練最完整，也是最完整的寒假托育方案。每張方案都同時標示優惠價與原價。</p>
     </div>
     <div class="pgrid">
-      <div class="pc reveal"><span class="ptag ghost">半天</span><div class="pdesc">早上班　09:00–12:00</div><div class="pnum"><span class="plabel">優惠價</span>$3,600</div><div class="porig">原價 <b>$3,900</b></div><div class="pcond">11/30 前報名即享優惠價</div><div class="pnote">每人・五天</div></div>
-      <div class="pc hi reveal d1"><span class="ptag">最完整 · 整天</span><div class="pdesc">整天班　09:00–17:00（含午休）</div><div class="pnum"><span class="plabel">優惠價</span>$7,200</div><div class="porig">原價 <b>$7,800</b></div><div class="pcond">11/30 前報名即享優惠價</div><div class="pnote">每人・五天</div></div>
-      <div class="pc reveal d2"><span class="ptag ghost">半天</span><div class="pdesc">下午班　14:00–17:00</div><div class="pnum"><span class="plabel">優惠價</span>$3,600</div><div class="porig">原價 <b>$3,900</b></div><div class="pcond">11/30 前報名即享優惠價</div><div class="pnote">每人・五天</div></div>
+      <div class="pc reveal"><span class="ptag ghost">半天</span><div class="pdesc">早上班　09:00–12:00</div><div class="price-block" data-reg="$3,900" data-dis="$3,600"><div class="pnum"><span class="plabel">優惠價</span>$3,600</div><div class="porig">原價 <b>$3,900</b></div><div class="pcond">11/30 前報名即享優惠價</div></div><div class="pnote">每人・五天</div></div>
+      <div class="pc hi reveal d1"><span class="ptag">最完整 · 整天</span><div class="pdesc">整天班　09:00–17:00（含午休）</div><div class="price-block" data-reg="$7,800" data-dis="$7,200"><div class="pnum"><span class="plabel">優惠價</span>$7,200</div><div class="porig">原價 <b>$7,800</b></div><div class="pcond">11/30 前報名即享優惠價</div></div><div class="pnote">每人・五天</div></div>
+      <div class="pc reveal d2"><span class="ptag ghost">半天</span><div class="pdesc">下午班　14:00–17:00</div><div class="price-block" data-reg="$3,900" data-dis="$3,600"><div class="pnum"><span class="plabel">優惠價</span>$3,600</div><div class="porig">原價 <b>$3,900</b></div><div class="pcond">11/30 前報名即享優惠價</div></div><div class="pnote">每人・五天</div></div>
     </div>
     <div class="promo-note reveal">
-      <b>三種優惠，擇一享優惠價（不可疊加）：</b>早鳥（11/30 前報名自動適用）／台大教職員子女／團體報名（5 人以上，各自完成報名）。<br>
+      <span id="promoList"><b>三種優惠，擇一享優惠價（不可疊加）：</b>早鳥（11/30 前報名自動適用）／台大教職員子女／團體報名（5 人以上，各自完成報名）。</span><br>
       <b>開班門檻 15 人</b>，確認開班後才寄送繳費通知，未達門檻不收取任何費用。<b>最終報名截止 1/10。</b>
     </div>
     <div class="refund-box reveal">
@@ -472,6 +472,19 @@ const io = new IntersectionObserver((entries) => {
   entries.forEach(e => { e.target.classList.toggle('visible', e.isIntersecting); });
 }, { threshold: 0.15 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+// 早鳥截止後，價格呈現自動改以原價為主
+// 註：此處僅影響「顯示」；實際收費由後端依報名時間計算，不受瀏覽器時鐘影響
+const EARLY_BIRD_END = new Date('2026-11-30T23:59:59+08:00');
+if (new Date() > EARLY_BIRD_END) {
+  document.querySelectorAll('.price-block').forEach(b => {
+    const reg = b.dataset.reg, dis = b.dataset.dis;
+    b.querySelector('.pnum').innerHTML = '<span class="plabel">原價</span>' + reg;
+    b.querySelector('.porig').innerHTML = '優惠價 <b>' + dis + '</b>';
+    b.querySelector('.pcond').textContent = '台大教職員子女・5 人以上團報 適用優惠價';
+  });
+  const pl = document.getElementById('promoList');
+  if (pl) pl.innerHTML = '<b>兩種優惠，擇一享優惠價（不可疊加）：</b>台大教職員子女／團體報名（5 人以上，各自完成報名）。';
+}
 // 場地照片放大檢視
 const lb=document.getElementById('lightbox'),lbImg=document.getElementById('lightboxImg'),lbCap=document.getElementById('lightboxCap');
 document.querySelectorAll('.zoomable img').forEach(img=>{
