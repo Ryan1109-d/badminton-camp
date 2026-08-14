@@ -241,11 +241,12 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .faq-i.open .faq-a{max-height:420px;padding-bottom:1.05rem}
 .faq-a{font-size:14px;color:var(--text-body);line-height:1.75}
 /* ===== CTA band ===== */
-.cta-band{padding:4rem 1.75rem;text-align:center;background:linear-gradient(135deg,var(--navy-deep) 0%,var(--blue) 100%);position:relative;overflow:hidden}
-.cta-band::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 80% 20%,rgba(242,160,60,.35) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 15% 90%,rgba(224,123,31,.4) 0%,transparent 60%);pointer-events:none}
+/* 底色調暗、橘色光暈降透明度：這一區寫的是報名截止日，白字需達 WCAG AA 4.5:1 */
+.cta-band{padding:4rem 1.75rem;text-align:center;background:linear-gradient(135deg,var(--navy-deep) 0%,var(--navy) 100%);position:relative;overflow:hidden}
+.cta-band::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 80% 20%,rgba(242,160,60,.12) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 15% 90%,rgba(224,123,31,.14) 0%,transparent 60%);pointer-events:none}
 .cta-band>*{position:relative}
 .cta-band .st{color:#fff;margin-bottom:.5rem}
-.cta-band p{font-size:14px;color:#c3d6ee;margin-bottom:1.6rem}
+.cta-band p{font-size:14px;color:#fff;margin-bottom:1.6rem}
 .cta-band .btn-blue{background:#fff;color:var(--navy);font-weight:700}
 .cta-band .btn-blue:hover{box-shadow:0 10px 24px rgba(0,0,0,.2)}
 /* ===== Footer ===== */
