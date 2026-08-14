@@ -54,8 +54,8 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .top-banner img{display:block;width:100%;height:clamp(133px,23vw,253px);object-fit:cover;object-position:center top;filter:saturate(.9) brightness(.96)}
 .banner-placeholder{width:100%;height:clamp(133px,23vw,253px);background:linear-gradient(135deg,var(--blue-soft),#fff);border-bottom:1px dashed var(--border);display:flex;align-items:center;justify-content:center}
 .banner-placeholder span{font-size:13px;color:var(--text-faint)}
-.hero{padding:5.5rem 1.75rem 5rem;text-align:center;border-bottom:none;position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(48,20,2,.90) 0%,rgba(122,50,6,.72) 42%,rgba(40,17,2,.92) 100%),url('images/hero-court.jpg') center 45%/cover no-repeat}
-.hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 80% 65% at 50% 0%,rgba(224,123,31,.20) 0%,transparent 68%),radial-gradient(ellipse 55% 55% at 82% 92%,rgba(122,52,6,.16) 0%,transparent 62%),radial-gradient(ellipse 50% 50% at 12% 88%,rgba(242,160,60,.12) 0%,transparent 60%);pointer-events:none}
+.hero{padding:5.5rem 1.75rem 5rem;text-align:center;border-bottom:none;position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(30,22,14,.88) 0%,rgba(74,50,26,.70) 42%,rgba(26,19,12,.92) 100%),url('images/hero-court.jpg') center 45%/cover no-repeat}
+.hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 80% 65% at 50% 0%,rgba(224,123,31,.08) 0%,transparent 68%);pointer-events:none}
 .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:56px 56px;pointer-events:none}
 .shuttle{font-size:3.2rem;margin-bottom:1rem;animation:float 3s ease-in-out infinite;position:relative;z-index:1}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
@@ -156,7 +156,8 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .pdesc{font-size:13px;color:var(--text-body);margin-bottom:5px;position:relative}
 .pnum{font-family:'Noto Serif TC',serif;font-size:2rem;font-weight:900;color:var(--blue);position:relative}
 .pnum .plabel{font-size:13px;font-family:'Noto Sans TC',sans-serif;font-weight:700;color:var(--text-muted);margin-right:4px}
-.porig{font-size:13px;color:var(--text-muted);margin-top:3px;position:relative}
+.porig{font-size:15px;color:var(--text-body);margin-top:5px;position:relative;font-weight:500}
+.porig s{color:var(--text-faint);text-decoration-thickness:1.5px}
 .punit{font-size:13px;color:var(--text-faint);font-weight:400}
 .pnote{font-size:12px;color:var(--text-muted);margin-top:6px;line-height:1.6;position:relative}
 .ph-spacer{height:25px}
@@ -390,12 +391,12 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
     <div class="reveal">
       <div class="sl">收費方案</div>
       <div class="st">三種時段，兩檔價格</div>
-      <p class="ss">半天適合作息彈性的家庭；整天班訓練最完整，也是最完整的寒假托育方案。以下為優惠價 / 原價。</p>
+      <p class="ss">半天適合作息彈性的家庭；整天班訓練最完整，也是最完整的寒假托育方案。每張方案都同時標示優惠價與原價。</p>
     </div>
     <div class="pgrid">
-      <div class="pc reveal"><span class="ptag ghost">半天</span><div class="pdesc">早上班　09:00–12:00</div><div class="pnum"><span class="plabel">優惠</span>$3,500</div><div class="porig">原價 $4,000</div><div class="pnote">每人・五天</div></div>
-      <div class="pc hi reveal d1"><span class="ptag">最完整 · 整天</span><div class="pdesc">整天班　09:00–17:00（含午休）</div><div class="pnum"><span class="plabel">優惠</span>$7,000</div><div class="porig">原價 $7,600</div><div class="pnote">每人・五天</div></div>
-      <div class="pc reveal d2"><span class="ptag ghost">半天</span><div class="pdesc">下午班　14:00–17:00</div><div class="pnum"><span class="plabel">優惠</span>$3,500</div><div class="porig">原價 $4,000</div><div class="pnote">每人・五天</div></div>
+      <div class="pc reveal"><span class="ptag ghost">半天</span><div class="pdesc">早上班　09:00–12:00</div><div class="pnum"><span class="plabel">優惠價</span>$3,600</div><div class="porig">原價 <s>$3,900</s></div><div class="pnote">每人・五天</div></div>
+      <div class="pc hi reveal d1"><span class="ptag">最完整 · 整天</span><div class="pdesc">整天班　09:00–17:00（含午休）</div><div class="pnum"><span class="plabel">優惠價</span>$7,200</div><div class="porig">原價 <s>$7,800</s></div><div class="pnote">每人・五天</div></div>
+      <div class="pc reveal d2"><span class="ptag ghost">半天</span><div class="pdesc">下午班　14:00–17:00</div><div class="pnum"><span class="plabel">優惠價</span>$3,600</div><div class="porig">原價 <s>$3,900</s></div><div class="pnote">每人・五天</div></div>
     </div>
     <div class="promo-note reveal">
       <b>三種優惠，擇一享優惠價（不可疊加）：</b>早鳥（11/30 前報名自動適用）／台大教職員（本人或子女）／團體報名（5 人以上，各自完成報名）。<br>
@@ -421,13 +422,13 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
       <div class="st">常見問題</div>
     </div>
     <div class="faq-list">
-      <div class="faq-i reveal"><button class="faq-q" type="button">孩子完全沒打過羽球可以參加嗎？<span class="faq-arrow">＋</span></button><div class="faq-a">可以。現場依實際程度分階，零基礎從握拍、步法開始，教練依進度調整，不用擔心跟不上。</div></div>
-      <div class="faq-i reveal"><button class="faq-q" type="button">半天班和整天班差在哪裡？<span class="faq-arrow">＋</span></button><div class="faq-a">半天（早上或下午，3 小時）適合作息彈性的家庭；整天班含午休、共 6 小時訓練，最完整，也是最完整的寒假托育方案。</div></div>
-      <div class="faq-i reveal"><button class="faq-q" type="button">需要自備羽球裝備嗎？<span class="faq-arrow">＋</span></button><div class="faq-a">建議穿著運動服與室內運動鞋。球拍可自備，營隊亦備有球拍供使用，羽球由營隊提供。</div></div>
-      <div class="faq-i reveal"><button class="faq-q" type="button">優惠可以一起用嗎？<span class="faq-arrow">＋</span></button><div class="faq-a">早鳥、台大教職員、團報三種優惠不可疊加，符合任一即享同一優惠價。</div></div>
-      <div class="faq-i reveal"><button class="faq-q" type="button">報名後何時繳費？<span class="faq-arrow">＋</span></button><div class="faq-a">報名送出即完成登記並收到確認信。達開班門檻並確認開班後，才會寄送繳費通知（轉帳），完成繳費即錄取。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">孩子完全沒打過羽球可以參加嗎？<span class="faq-arrow">＋</span></button><div class="faq-a">當然可以，而且很多孩子都是第一次拿拍！我們從握拍、揮拍、腳步這些最基本的開始教，教練會照每個孩子的節奏走，不會有跟不上的問題。零基礎的小朋友放心來。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">半天班和整天班差在哪裡？<span class="faq-arrow">＋</span></button><div class="faq-a">半天班是上午或下午三小時，適合作息比較彈性、或想先讓孩子試試看的家庭。整天班六小時含午休，訓練最完整，寒假整天有地方去，家長安排工作也比較好抓時間。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">需要自備羽球裝備嗎？<span class="faq-arrow">＋</span></button><div class="faq-a">穿好活動的運動服和室內運動鞋就可以了。球拍想自己帶沒問題，沒有的話我們現場也備有球拍給孩子用，羽球全部由營隊提供，空手來就行！</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">優惠可以一起用嗎？<span class="faq-arrow">＋</span></button><div class="faq-a">不好意思，三種優惠沒辦法疊加喔。早鳥、台大教職員、團報，只要符合其中任何一種就享同一個優惠價，不會因為同時符合兩種而更便宜，這點要請您見諒。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">報名後何時繳費？<span class="faq-arrow">＋</span></button><div class="faq-a">先報名就好，不用馬上付錢！送出後您會收到一封報名確認信，等報名人數達到開班標準、確定開班之後，我們才會寄繳費通知給您。在確定開班前，我們不會收取任何費用。</div></div>
       <div class="faq-i reveal"><button class="faq-q" type="button">沒收到確認信怎麼辦？<span class="faq-arrow">＋</span></button><div class="faq-a">先麻煩您到「垃圾郵件」或「促銷內容」資料夾找一下，系統信有時會被自動分類過去。如果找過還是沒有，很可能是報名時信箱有誤，請直接來信 stayyoung985@gmail.com 告訴我們孩子的姓名，我們會幫您確認報名狀態並補寄一次，不用擔心報名沒成功。</div></div>
-      <div class="faq-i reveal"><button class="faq-q" type="button">額滿後如何候補？<span class="faq-arrow">＋</span></button><div class="faq-a">名額額滿後，後續報名自動列入候補。有名額釋出時，以 email 通知候補者，先完成繳費者優先。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">額滿後如何候補？<span class="faq-arrow">＋</span></button><div class="faq-a">如果名額滿了，您的報名會自動排進候補名單，一樣不會收任何費用。只要有人取消釋出名額，我們會立刻用 email 通知您，依序遞補。</div></div>
     </div>
   </div>
 </section>
@@ -446,7 +447,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
     <div class="fs">台灣大學羽球冬令營 2027 · 場地合作：國立臺灣大學</div>
   </div>
   <div class="fi2">
-    聯繫我們：stayyoung985@gmail.com<br>張軒瑀 Ryan　0979-032-572
+    聯繫我們：stayyoung985@gmail.com<br>0979-032-572
   </div>
 </footer>
 <script>

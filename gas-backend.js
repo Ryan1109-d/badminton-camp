@@ -259,8 +259,8 @@ function calcAmount(row) {
   const d = String(row[COL.DISCOUNT] || '');
   const discounted = early || d === '團報' || d === '台大教職員';
   const fullDay = String(row[COL.SLOT] || '').indexOf('整天') >= 0;
-  const base = fullDay ? (discounted ? 7000 : 7600)
-                       : (discounted ? 3500 : 4000);
+  const base = fullDay ? (discounted ? 7200 : 7800)
+                       : (discounted ? 3600 : 3900);
   const meal = String(row[COL.LUNCH] || '').indexOf('代訂') >= 0 ? 500 : 0;
   return { base: base, meal: meal, total: base + meal,
            slotLabel: fullDay ? '整天班' : '半天班',
@@ -302,7 +302,7 @@ ${CONFIG.REPLY_EMAIL}`;
 
 /** 預覽：只寄一封範例信給自己，不讀 Sheet、不動任何資料 */
 function previewPaymentNotice() {
-  const amt = { base: 7000, meal: 500, total: 7500,
+  const amt = { base: 7200, meal: 500, total: 7700,
                 slotLabel: '整天班', label: '早鳥優惠價' };
   const body = buildPaymentBody('王小華（範例）', '第一梯 2027/1/25–1/29',
                                 '整天班（09:00–17:00）', amt);
