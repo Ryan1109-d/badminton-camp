@@ -387,8 +387,38 @@ function sendPaymentNotice() {
 
 // ══════════════════════════════════════════
 // 每日自動備份
-// 安裝：Apps Script 左側「觸發條件」→ 新增 → dailyBackup／時間驅動／日計時器／23:00–00:00
+//
+// 安裝方式（擇一）：
+//   A. 【建議】在上方函式下拉選單選 installDailyBackupTrigger 按執行，一次就裝好。
+//   B. 手動：左側「觸發條件」→ 新增 → dailyBackup／時間驅動／日計時器／23:00–00:00
 // ══════════════════════════════════════════
+
+/**
+ * 一鍵安裝每日備份觸發條件（每天 23:00–00:00 之間跑一次 dailyBackup）。
+ * 會先刪掉既有的 dailyBackup 觸發條件，重複執行不會裝出兩個。
+ */
+function installDailyBackupTrigger() {
+  var removed = 0;
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'dailyBackup') { ScriptApp.deleteTrigger(t); removed++; }
+  });
+  ScriptApp.newTrigger('dailyBackup').timeBased().atHour(23).everyDays(1).create();
+  var msg = '已安裝每日備份觸發條件（每天 23:00–00:00）' +
+            (removed ? '，並清掉 ' + removed + ' 個舊的。' : '。');
+  Logger.log(msg);
+  return msg;
+}
+
+/** 檢查目前裝了哪些觸發條件（隨時可安全執行） */
+function listTriggers() {
+  var lines = ScriptApp.getProjectTriggers().map(function (t) {
+    return t.getHandlerFunction() + '（' + t.getEventType() + '）';
+  });
+  var msg = lines.length ? '目前的觸發條件：\n' + lines.join('\n') : '目前沒有任何觸發條件。';
+  Logger.log(msg);
+  return msg;
+}
+
 function dailyBackup() {
   // 資料夾必須與足球站分開，否則兩站的 slice(14) 會互刪對方的備份，保留天數砍半
   const FOLDER_NAME = 'StayYoung 報名備份_羽球';
