@@ -28,9 +28,9 @@ const CONFIG = {
   // ⚠️ 收款資訊：以下為測試值。只要任何一項還是「（測試）」開頭，
   //    sendPaymentNotice() 會拒絕寄給家長，只寄預覽給自己。
   PAYMENT: {
-    BANK: '（測試）台灣銀行 004',
-    ACCOUNT_NAME: '（測試）戶名尚未設定',
-    ACCOUNT_NO: '（測試）0000000000000',
+    BANK: '國泰世華銀行 013',
+    ACCOUNT_NAME: '（測試）戶名尚未設定',   // ⚠️ 換成真實戶名後才會開始寄繳費通知
+    ACCOUNT_NO: '699522993691',
     DEADLINE_DAYS: 7
   }
 };

@@ -80,6 +80,11 @@ body{font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei"
 .flow-num{width:22px;height:22px;border-radius:50%;background:rgba(224,123,31,.09);border:.5px solid rgba(224,123,31,.3);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 5px}
 .flow-txt{font-size:11px;color:#4a5b6c;line-height:1.5}
 .form-g{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+/* ===== 分段卡片：把表單依主題切成一格一格，家長比較好讀 ===== */
+.form-card{grid-column:1/-1;background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:1.1rem 1.15rem 1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.form-card>.fc-title{grid-column:1/-1;font-size:12.5px;font-weight:700;color:var(--accent);letter-spacing:.05em;padding-bottom:.65rem;border-bottom:.5px solid var(--border-soft);margin-bottom:.15rem;display:flex;align-items:center;gap:7px}
+.form-card>.fc-title .fc-num{width:19px;height:19px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+@media(max-width:560px){.form-card{grid-template-columns:1fr}}
 .fg{display:flex;flex-direction:column;gap:5px}
 .fg.full{grid-column:1/-1}
 .fg label{font-size:12px;color:var(--text-body)}
@@ -179,6 +184,8 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
         <label for="contact_pref_2">網站</label>
         <input type="text" id="contact_pref_2" name="contact_pref_2" tabindex="-1" autocomplete="off">
       </div>
+      <div class="form-card">
+        <div class="fc-title"><span class="fc-num">1</span>報名梯次與時段</div>
       <div class="fg full">
         <label for="session">報名梯次 <span class="req">*</span></label>
         <select id="session" name="session" required>
@@ -213,6 +220,10 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
         </label>
       </div>
 
+      </div>
+
+      <div class="form-card">
+        <div class="fc-title"><span class="fc-num">2</span>學員資料</div>
       <div class="fg">
         <label for="studentName">學員姓名 <span class="req">*</span></label>
         <input type="text" id="studentName" name="studentName" placeholder="王小華" required>
@@ -243,6 +254,10 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
           <option value="成人L">成人 L</option>
         </select>
       </div>
+      </div>
+
+      <div class="form-card">
+        <div class="fc-title"><span class="fc-num">3</span>聯絡資訊</div>
       <div class="fg full">
         <label for="email">信箱 <span class="req">*</span>　<span style="color:var(--text-faint);font-weight:400">報名確認信與後續通知寄送至此</span></label>
         <input type="email" id="email" name="email" placeholder="email@example.com" required>
@@ -255,6 +270,10 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
         <label for="emgPhone">緊急聯絡人電話 <span class="req">*</span></label>
         <input type="tel" id="emgPhone" name="emgPhone" placeholder="0912345678" required>
       </div>
+      </div>
+
+      <div class="form-card">
+        <div class="fc-title"><span class="fc-num">4</span>繳款人資料</div>
       <div class="same-check">
         <input type="checkbox" id="sameAsEmg">
         <label for="sameAsEmg">繳款人同緊急聯絡人</label>
@@ -271,6 +290,10 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
         <label for="payerEmail">繳款人信箱 <span class="req">*</span></label>
         <input type="email" id="payerEmail" name="payerEmail" placeholder="email@example.com" required>
       </div>
+      </div>
+
+      <div class="form-card">
+        <div class="fc-title"><span class="fc-num">5</span>優惠與餐食</div>
       <div class="fg full">
         <label for="discount">優惠身份 <span class="req">*</span></label>
         <select id="discount" name="discount" required>
@@ -313,6 +336,10 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
           </div>
         </label>
       </div>
+      </div>
+
+      <div class="form-card">
+        <div class="fc-title"><span class="fc-num">6</span>健康與安全</div>
       <div class="fg full">
         <label>學員健康狀況 <span class="req">*</span>　<span style="color:var(--text-faint);font-weight:400">為了孩子的安全，請務必據實填寫</span></label>
         <div class="pc-row">
@@ -328,6 +355,10 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
         <label for="notes">其他想告訴我們的</label>
         <input type="text" id="notes" name="notes" placeholder="其他希望教練留意的事項（選填）">
       </div>
+      </div>
+
+      <div class="form-card">
+        <div class="fc-title"><span class="fc-num">7</span>同意與確認</div>
       <div class="fg full">
         <label>照片使用同意 <span class="req">*</span></label>
         <div class="pc-row">
@@ -347,10 +378,12 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
           <span>本人為學員之法定代理人，或已取得法定代理人同意，得以代為完成本報名程序 <span class="req">*</span></span>
         </label>
       </div>
-      <div style="background:rgba(106,165,221,.06);border:1px solid rgba(106,165,221,.15);border-radius:10px;padding:1rem;font-size:0.85rem;line-height:1.8;color:var(--text-muted);margin:1rem 0">
-        <strong style="color:white">本表單蒐集之個人資料，</strong><br>
-        僅用於本營隊報名、聯繫、保險投保及活動安全管理，活動結束後六個月內刪除，不作其他用途。
+      <div class="fg full" style="background:var(--card-light);border:.5px solid var(--border-soft);border-radius:8px;padding:.9rem 1rem;font-size:12px;line-height:1.75;color:#4a5b6c;gap:0">
+        <strong style="color:var(--text-2);font-weight:600">個人資料使用說明</strong>
+        <span style="margin-top:4px">本表單蒐集之個人資料，僅用於本營隊報名、聯繫、保險投保及活動安全管理，活動結束後六個月內刪除，不作其他用途。</span>
       </div>
+      </div>
+
       <div class="notice-box">
         <div class="notice-title">報名後流程說明</div>
         <div class="notice-text">送出報名後，您會先收到「報名確認信」。待報名人數達開班標準並確認開班後，我們才會寄送「繳費通知」，屆時再依通知的帳號完成轉帳繳費即可。開班前不會收取任何費用。</div>
