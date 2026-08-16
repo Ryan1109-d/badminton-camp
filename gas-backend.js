@@ -3,8 +3,11 @@
  * （與足球營完全分開：請用新的 Google Sheet + 新的 Apps Script 部署）
  *
  * 部署步驟：
- * 1. Google Sheet 第一列欄位標題（共 26 欄，與下方 appendRow 順序一致）：
- *    報名時間 | 梯次 | 時段 | 學員姓名 | 性別 | 年齡 | 年級 | 收信信箱 | 緊急聯絡人 | 緊急聯絡人電話 | 繳款人姓名 | 繳款人電話 | 繳款人信箱 | 優惠身份 | 午餐 | 狀態 | 團報成員 | 衣服尺寸 | 備註 | 照片同意 | 健康狀況 | 健康說明 | 緊急醫療授權 | 法定代理人聲明 | 繳費通知 | 系統訊息
+ * 1. Google Sheet 第一列欄位標題（共 27 欄，與下方 appendRow 順序一致）：
+ *    報名時間 | 梯次 | 時段 | 學員姓名 | 性別 | 年齡 | 年級 | 收信信箱 | 緊急聯絡人 | 緊急聯絡人電話 | 繳款人姓名 | 繳款人電話 | 繳款人信箱 | 優惠身份 | 推薦人 | 午餐 | 狀態 | 團報成員 | 衣服尺寸 | 備註 | 照片同意 | 健康狀況 | 健康說明 | 緊急醫療授權 | 法定代理人聲明 | 繳費通知 | 系統訊息
+ *
+ *    ⚠️ 2026-08-17 新增第 15 欄「推薦人」。若 Sheet 已有報名資料，
+ *       請用「插入 1 欄」而不是直接改標題，否則第 15 欄之後的既有資料會全部錯位。
  * 2. Sheet 上方選 擴充功能 → Apps Script，貼上本檔案全部內容
  * 3. 修改下方 CONFIG 的 SHEET_ID（網址中 /d/ 和 /edit 之間那串）
  * 4. 部署 → 新增部署作業 → 類型選「網頁應用程式」
@@ -25,6 +28,12 @@ const CONFIG = {
   REPLY_EMAIL: 'stayyoung985@gmail.com',
   // 早鳥截止（含當日）。此日期前完成報名者，不限身份適用優惠價
   EARLY_BIRD_DEADLINE: '2026-11-20T23:59:59+08:00',
+  // 定價（2026-08-17 起）。兩道折扣互相獨立、可以疊加：
+  //   ① 優惠身份：早鳥 / 團報 / 台大教職員（三擇一，彼此不疊加）→ 轉帳時直接折抵
+  //   ② 推薦人：報名表填了推薦人姓名 → 走「事後申請退款」，不先折抵
+  //   整天 8200 → 7700（身份）→ 7200（再退推薦 500）
+  //   半天 4100 → 3850（身份）→ 3600（再退推薦 250）
+  PRICE: { FULL: 8200, HALF: 4100, STEP_FULL: 500, STEP_HALF: 250 },
   // ⚠️ 收款資訊：以下為測試值。只要任何一項還是「（測試）」開頭，
   //    sendPaymentNotice() 會拒絕寄給家長，只寄預覽給自己。
   PAYMENT: {
@@ -39,12 +48,12 @@ const COL = {
   TIME: 0, SESSION: 1, SLOT: 2, STUDENT: 3, GENDER: 4, AGE: 5, GRADE: 6,
   EMAIL: 7, EMG_NAME: 8, EMG_PHONE: 9,
   PAYER_NAME: 10, PAYER_PHONE: 11, PAYER_EMAIL: 12,
-  DISCOUNT: 13, LUNCH: 14, STATUS: 15, GROUP: 16, SHIRT: 17,
-  NOTES: 18, PHOTO: 19,
-  HEALTH: 20, HEALTH_DETAIL: 21, MEDICAL: 22, GUARDIAN: 23
+  DISCOUNT: 13, REFERRER: 14, LUNCH: 15, STATUS: 16, GROUP: 17, SHIRT: 18,
+  NOTES: 19, PHOTO: 20,
+  HEALTH: 21, HEALTH_DETAIL: 22, MEDICAL: 23, GUARDIAN: 24
 };
-const NOTICE_COL = 25;   // 繳費通知（1-based）
-const SYSMSG_COL = 26;   // 系統訊息（1-based）
+const NOTICE_COL = 26;   // 繳費通知（1-based）
+const SYSMSG_COL = 27;   // 系統訊息（1-based）
 
 /** 給 Sheet 儲存格用：前置單引號讓 Sheets 視為純文字，防公式注入 */
 function safeCell(v, maxLen) {
@@ -141,6 +150,8 @@ function doPost(e) {
       payerPhone:   safeCell(data.payerPhone, 15),
       payerEmail:   safeCell(data.payerEmail, 254),
       discount:     safeCell(data.discount, 20),
+      // 推薦人為選填。空值一律寫「—」，calcAmount 以此判定不適用推薦優惠。
+      referrer:     safeCell(data.referrer, 20) || '—',
       lunch:        safeCell(data.lunch, 30),
       groupMembers: safeCell(data.groupMembers, 200) || '—',
       shirtSize:    safeCell(data.shirtSize, 20),
@@ -178,13 +189,13 @@ function doPost(e) {
     }
     const isWaitlist = sessionCount >= CONFIG.CAPACITY;
     const status = isWaitlist ? '候補' : '正取';
-    // ---- 寫入 Sheet（共 26 欄）----
+    // ---- 寫入 Sheet（共 27 欄）----
     sheet.appendRow([
       new Date(),
       clean.session, clean.slot, clean.studentName, clean.gender, clean.age, clean.grade,
       clean.email, clean.emgName, clean.emgPhone,
       clean.payerName, clean.payerPhone, clean.payerEmail,
-      clean.discount, clean.lunch,
+      clean.discount, clean.referrer, clean.lunch,
       status,
       clean.groupMembers, clean.shirtSize, clean.notes, clean.photoConsent,
       clean.health, clean.healthDetail, clean.medical, clean.guardian,
@@ -283,21 +294,43 @@ function paymentIsPlaceholder() {
     .some(v => String(v).indexOf('（測試）') === 0);
 }
 
-/** 依報名時間、時段、優惠身份、午餐計算應繳金額 */
+/**
+ * 依報名時間、時段、優惠身份、推薦人、午餐計算應繳金額。
+ *
+ * ⚠️ 午餐費「有」併入轉帳總額：本營隊金流不經學校、不被抽成，與足球營相反。
+ *
+ * ⚠️ 推薦人優惠採「事後申請退款」，不在轉帳金額內先折抵。
+ *    原因：A 推薦 B 時，A 往往已經先繳費了，當下無法預先折抵。
+ *    因此一律先收未折推薦的金額，成立後再退 refundable 給家長。
+ *    推薦人「不自動查證」，只看欄位有沒有填；若查證不成立，把 Sheet 上
+ *    該格清成「—」再重跑即可。
+ */
 function calcAmount(row) {
   const regTime = row[COL.TIME];
   const early = (regTime instanceof Date) &&
                 regTime <= new Date(CONFIG.EARLY_BIRD_DEADLINE);
   const d = String(row[COL.DISCOUNT] || '');
-  const discounted = early || d === '團報' || d === '台大教職員';
+  const hasStatus = early || d === '團報' || d === '台大教職員';
+  const ref = String(row[COL.REFERRER] || '').trim();
+  const hasReferrer = ref !== '' && ref !== '—';
   // 精確比對（值已於 doPost 通過白名單驗證，格式固定）
   const fullDay = String(row[COL.SLOT] || '').trim() === '整天班（09:00–17:00）';
-  const base = fullDay ? (discounted ? 7200 : 7800)
-                       : (discounted ? 3600 : 3900);
+
+  const listPrice = fullDay ? CONFIG.PRICE.FULL : CONFIG.PRICE.HALF;
+  const step      = fullDay ? CONFIG.PRICE.STEP_FULL : CONFIG.PRICE.STEP_HALF;
+  const base      = listPrice - (hasStatus ? step : 0);
+  const refundable = hasReferrer ? step : 0;
+
+  const breakdown = [];
+  if (hasStatus) {
+    breakdown.push((early ? '早鳥優惠' : '優惠身份（' + d + '）') + '　−NT$ ' + step);
+  }
+
   const meal = (fullDay && String(row[COL.LUNCH] || '').indexOf('代訂') >= 0) ? 500 : 0;
-  return { base: base, meal: meal, total: base + meal,
-           slotLabel: fullDay ? '整天班' : '半天班',
-           label: discounted ? (early ? '早鳥優惠價' : '優惠價') : '原價' };
+  return { listPrice: listPrice, base: base, meal: meal, total: base + meal,
+           refundable: refundable, hasReferrer: hasReferrer, referrer: ref,
+           slotLabel: fullDay ? '整天班' : '半天班', breakdown: breakdown,
+           label: hasStatus ? (early ? '早鳥優惠價' : '優惠價') : '原價' };
 }
 
 /** 組繳費通知信內容 */
@@ -314,9 +347,10 @@ ${CONFIG.CAMP_NAME} 已達開班標準，確定開班！
 ── 費用明細 ──
 梯次：${session}
 時段：${slot}（${amt.slotLabel}）
-營隊費用：NT$ ${amt.base}（${amt.label}）${amt.meal ? '\n代訂午餐：NT$ ' + amt.meal + '（五天）' : ''}
+原價：NT$ ${amt.listPrice}
+${amt.breakdown.length ? amt.breakdown.map(x => '　' + x).join('\n') + '\n' : ''}營隊費用：NT$ ${amt.base}${amt.meal ? '\n代訂午餐：NT$ ' + amt.meal + '（五天）' : ''}
 應繳總額：NT$ ${amt.total}
-
+${amt.hasReferrer ? '\n── 推薦人優惠 ──\n您填寫的推薦人：' + amt.referrer + '\n經確認推薦人也完成報名後，可申請退還 NT$ ' + amt.refundable + '。\n※ 這筆優惠「不含」在上方轉帳金額內，請先依上方總額轉帳，\n　 我們核對後會主動與您聯繫辦理退款。\n' : ''}
 ── 轉帳資訊 ──
 銀行：${p.BANK}
 戶名：${p.ACCOUNT_NAME}
@@ -335,8 +369,10 @@ ${CONFIG.REPLY_EMAIL}`;
 
 /** 預覽：只寄一封範例信給自己，不讀 Sheet、不動任何資料 */
 function previewPaymentNotice() {
-  const amt = { base: 7200, meal: 500, total: 7700,
-                slotLabel: '整天班', label: '早鳥優惠價' };
+  const amt = { listPrice: CONFIG.PRICE.FULL, base: 7700, meal: 500, total: 8200,
+                refundable: 500, hasReferrer: true, referrer: '陳小美（範例）',
+                slotLabel: '整天班', breakdown: ['早鳥優惠　−NT$ 500'],
+                label: '早鳥優惠價' };
   const body = buildPaymentBody('王小華（範例）', '第一梯 2027/1/25–1/29',
                                 '整天班（09:00–17:00）', amt);
   MailApp.sendEmail({

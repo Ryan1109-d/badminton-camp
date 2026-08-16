@@ -201,22 +201,22 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
           <input type="radio" name="slot" value="早上班（09:00–12:00）">
           <div class="slot-name">早上班</div>
           <div class="slot-time">09:00–12:00 半天</div>
-          <div class="slot-price">優惠價 $3,600</div>
-          <div class="slot-orig">原價 $3,900</div>
+          <div class="slot-price">優惠價 $3,850</div>
+          <div class="slot-orig">原價 $4,100</div>
         </label>
         <label class="slot-opt" data-slot="fullday">
           <input type="radio" name="slot" value="整天班（09:00–17:00）">
           <div class="slot-name">整天班</div>
           <div class="slot-time">09:00–17:00 含午休</div>
-          <div class="slot-price">優惠價 $7,200</div>
-          <div class="slot-orig">原價 $7,800</div>
+          <div class="slot-price">優惠價 $7,700</div>
+          <div class="slot-orig">原價 $8,200</div>
         </label>
         <label class="slot-opt" data-slot="afternoon">
           <input type="radio" name="slot" value="下午班（14:00–17:00）">
           <div class="slot-name">下午班</div>
           <div class="slot-time">14:00–17:00 半天</div>
-          <div class="slot-price">優惠價 $3,600</div>
-          <div class="slot-orig">原價 $3,900</div>
+          <div class="slot-price">優惠價 $3,850</div>
+          <div class="slot-orig">原價 $4,100</div>
         </label>
       </div>
 
@@ -301,7 +301,12 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
           <option value="團報">5 人以上團報</option>
           <option value="台大教職員">台大教職員</option>
         </select>
-        <span id="promoNote" style="font-size:11px;color:var(--text-muted);margin-top:3px">2026/11/20（含）前完成報名，不限身份自動適用早鳥優惠價（三種優惠不可疊加）</span>
+        <span id="promoNote" style="font-size:11px;color:var(--text-muted);margin-top:3px">2026/11/20（含）前完成報名，不限身份自動適用早鳥優惠價。以上三種身份擇一適用，彼此不可疊加。</span>
+      </div>
+      <div class="fg full">
+        <label for="referrer">推薦人姓名（選填）</label>
+        <input type="text" id="referrer" name="referrer" maxlength="20" placeholder="推薦您報名的朋友姓名">
+        <span style="font-size:11px;color:var(--text-muted);margin-top:3px">推薦人須為本營隊的報名者。經我們確認後，您與推薦人<strong>雙方各再減 $500</strong>（半天班 $250），此優惠<strong>可與上方優惠身份疊加</strong>。<strong>本項以退款方式退還</strong>：請先依繳費通知上的金額完成轉帳，我們核對推薦關係後會主動與您聯繫辦理退款，不會在轉帳金額中先行折抵。</span>
       </div>
       <div class="group-box" id="groupBox" style="display:none">
         <div class="gb-title">團報學員名單</div>
@@ -436,7 +441,7 @@ if (new Date() > EARLY_BIRD_END) {
   });
   // 優惠條件說明：早鳥已過，只剩台大教職員子女與團報
   const pn = document.getElementById('promoNote');
-  if (pn) pn.textContent = '兩種優惠，擇一享優惠價（不可疊加）：台大教職員子女／團體報名（5 人以上，各自完成報名）。';
+  if (pn) pn.textContent = '早鳥已截止。剩餘兩種身份擇一適用，彼此不可疊加：台大教職員子女／團體報名（5 人以上，各自完成報名）。';
 }
 
 // 時段選擇：視覺選中 + 整天才顯示午餐
@@ -592,6 +597,7 @@ form.addEventListener('submit', async (e) => {
     payerPhone: document.getElementById('payerPhone').value.replace(/[-\s]/g,''),
     payerEmail: document.getElementById('payerEmail').value.trim(),
     discount: document.getElementById('discount').value,
+    referrer: document.getElementById('referrer').value.trim(),
     lunch: (() => {
       if (!slotChecked.value.startsWith('整天')) return '不適用（半天）';
       const l = document.querySelector('input[name="lunch"]:checked').value;

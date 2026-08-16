@@ -455,12 +455,13 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
       <p class="ss">半天適合作息彈性的家庭；整天班訓練最完整，也是最完整的寒假托育方案。每張方案都同時標示優惠價與原價。</p>
     </div>
     <div class="pgrid">
-      <div class="pc reveal"><span class="ptag ghost">半天</span><div class="pdesc">早上班　09:00–12:00</div><div class="price-block" data-reg="$3,900" data-dis="$3,600"><div class="pnum"><span class="plabel">優惠價</span>$3,600</div><div class="porig">原價 <b>$3,900</b></div><div class="pcond">11/20 前報名即享優惠價</div></div><div class="pnote">每人・五天</div></div>
-      <div class="pc hi reveal d1"><span class="ptag">最完整 · 整天</span><div class="pdesc">整天班　09:00–17:00（含午休）</div><div class="price-block" data-reg="$7,800" data-dis="$7,200"><div class="pnum"><span class="plabel">優惠價</span>$7,200</div><div class="porig">原價 <b>$7,800</b></div><div class="pcond">11/20 前報名即享優惠價</div></div><div class="pnote">每人・五天</div></div>
-      <div class="pc reveal d2"><span class="ptag ghost">半天</span><div class="pdesc">下午班　14:00–17:00</div><div class="price-block" data-reg="$3,900" data-dis="$3,600"><div class="pnum"><span class="plabel">優惠價</span>$3,600</div><div class="porig">原價 <b>$3,900</b></div><div class="pcond">11/20 前報名即享優惠價</div></div><div class="pnote">每人・五天</div></div>
+      <div class="pc reveal"><span class="ptag ghost">半天</span><div class="pdesc">早上班　09:00–12:00</div><div class="price-block" data-reg="$4,100" data-dis="$3,850"><div class="pnum"><span class="plabel">優惠價</span>$3,850</div><div class="porig">原價 <b>$4,100</b></div><div class="pcond">11/20 前報名即享優惠價</div></div><div class="pnote">每人・五天</div></div>
+      <div class="pc hi reveal d1"><span class="ptag">最完整 · 整天</span><div class="pdesc">整天班　09:00–17:00（含午休）</div><div class="price-block" data-reg="$8,200" data-dis="$7,700"><div class="pnum"><span class="plabel">優惠價</span>$7,700</div><div class="porig">原價 <b>$8,200</b></div><div class="pcond">11/20 前報名即享優惠價</div></div><div class="pnote">每人・五天</div></div>
+      <div class="pc reveal d2"><span class="ptag ghost">半天</span><div class="pdesc">下午班　14:00–17:00</div><div class="price-block" data-reg="$4,100" data-dis="$3,850"><div class="pnum"><span class="plabel">優惠價</span>$3,850</div><div class="porig">原價 <b>$4,100</b></div><div class="pcond">11/20 前報名即享優惠價</div></div><div class="pnote">每人・五天</div></div>
     </div>
     <div class="promo-note reveal">
-      <span id="promoList"><b>三種優惠，擇一享優惠價（不可疊加）：</b>早鳥（11/20 前報名自動適用）／台大教職員子女／團體報名（5 人以上，各自完成報名）。</span><br>
+      <span id="promoList"><b>三種優惠身份，擇一享優惠價（彼此不可疊加）：</b>早鳥（11/20 前報名自動適用）／台大教職員子女／團體報名（5 人以上，各自完成報名）。</span><br>
+      <b>推薦人優惠可與上述疊加：</b>報名表填寫推薦人姓名，經確認推薦人也完成報名後，整天班再減 $500、半天班再減 $250。<b>這筆優惠以退款方式退還</b>，不在轉帳金額內先折抵。<br>
       <b>開班門檻 15 人</b>，確認開班後才寄送繳費通知，未達門檻不收取任何費用。<b>最終報名截止 1/10。</b>
     </div>
     <div class="refund-box reveal">
@@ -541,7 +542,7 @@ if (new Date() > EARLY_BIRD_END) {
     b.querySelector('.pcond').textContent = '台大教職員子女・5 人以上團報 適用優惠價';
   });
   const pl = document.getElementById('promoList');
-  if (pl) pl.innerHTML = '<b>兩種優惠，擇一享優惠價（不可疊加）：</b>台大教職員子女／團體報名（5 人以上，各自完成報名）。';
+  if (pl) pl.innerHTML = '<b>兩種優惠身份，擇一享優惠價（彼此不可疊加）：</b>台大教職員子女／團體報名（5 人以上，各自完成報名）。';
 }
 // 場地照片放大檢視
 const lb=document.getElementById('lightbox'),lbImg=document.getElementById('lightboxImg'),lbCap=document.getElementById('lightboxCap');
