@@ -301,7 +301,7 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
           <option value="團報">5 人以上團報</option>
           <option value="台大教職員">台大教職員</option>
         </select>
-        <span id="promoNote" style="font-size:11px;color:var(--text-muted);margin-top:3px">2026/11/30（含）前完成報名，不限身份自動適用早鳥優惠價（三種優惠不可疊加）</span>
+        <span id="promoNote" style="font-size:11px;color:var(--text-muted);margin-top:3px">2026/11/20（含）前完成報名，不限身份自動適用早鳥優惠價（三種優惠不可疊加）</span>
       </div>
       <div class="group-box" id="groupBox" style="display:none">
         <div class="gb-title">團報學員名單</div>
@@ -415,7 +415,7 @@ const msgBox = document.getElementById('formMsg');
 
 // 早鳥截止後，價格呈現自動改以原價為主（與首頁 index.html 同一套判定）
 // 註：此處僅影響「顯示」；實際收費由後端依報名時間計算，不受瀏覽器時鐘影響
-const EARLY_BIRD_END = new Date('2026-11-30T23:59:59+08:00');
+const EARLY_BIRD_END = new Date('2026-11-20T23:59:59+08:00');
 if (new Date() > EARLY_BIRD_END) {
   document.querySelectorAll('.slot-opt').forEach(opt => {
     const priceEl = opt.querySelector('.slot-price');   // 早鳥期間顯示「優惠價 $X」
