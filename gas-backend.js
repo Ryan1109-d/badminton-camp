@@ -34,6 +34,10 @@ const CONFIG = {
   //   整天 8200 → 7700（身份）→ 7200（再退推薦 500）
   //   半天 4100 → 3850（身份）→ 3600（再退推薦 250）
   PRICE: { FULL: 8200, HALF: 4100, STEP_FULL: 500, STEP_HALF: 250 },
+  // 家長 LINE 社群邀請連結。⚠️ 真值只填在 Apps Script，不要 commit 進 public repo
+  //    （這是可公開加入的邀請網址，落在公開 repo 等於任何人都能加進家長群）。
+  //    維持佔位字串時，確認信會自動略過整段 LINE 說明，不會寄出壞掉的連結。
+  LINE_GROUP_URL: 'YOUR_LINE_GROUP_URL_HERE',
   // ⚠️ 收款資訊：以下為測試值。只要任何一項還是「（測試）」開頭，
   //    sendPaymentNotice() 會拒絕寄給家長，只寄預覽給自己。
   PAYMENT: {
@@ -113,6 +117,20 @@ function checkSetup() {
   const msg = out.join('\n');
   Logger.log(msg);
   return msg;
+}
+
+/**
+ * 確認信裡的 LINE 家長社群段落。
+ * LINE_GROUP_URL 還是佔位字串時回傳空字串，整段不會出現在信裡，
+ * 避免家長收到「請點選以下連結：YOUR_LINE_GROUP_URL_HERE」。
+ */
+function lineSection() {
+  const url = String(CONFIG.LINE_GROUP_URL || '').trim();
+  if (!url || url.indexOf('http') !== 0) return '';
+  return '\n\n── 加入家長社群 ──\n' +
+         '請加入本營隊的 LINE 家長社群，開班通知、繳費提醒與每日花絮都會在這裡發布：\n' +
+         url + '\n' +
+         '※ 此連結僅提供給已報名的家長，請勿轉發給無關人士。' + '\n';
 }
 
 /** 給 Sheet 儲存格用：前置單引號讓 Sheets 視為純文字，防公式注入 */
@@ -308,7 +326,7 @@ function sendConfirmEmail(data) {
 2. 依通知的帳號完成轉帳繳費後即確認錄取
 3. 開課前會再寄送行前通知信
 開班確認前不會收取任何費用，請安心等候通知。
-若有任何問題，歡迎直接回覆本信。
+若有任何問題，歡迎直接回覆本信。${lineSection()}
 Stay Young 台灣大學羽球冬令營
 ${CONFIG.REPLY_EMAIL}`;
   MailApp.sendEmail({
