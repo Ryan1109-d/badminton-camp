@@ -195,6 +195,7 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
 
       <div class="fg full">
         <label>報名時段 <span class="req">*</span>　<span style="color:var(--text-faint);font-weight:400">價格為 優惠價 / 原價</span></label>
+        <span id="earlyBirdBadge" style="display:inline-block;align-self:flex-start;margin-top:2px;background:rgba(224,123,31,.1);border:.5px solid rgba(224,123,31,.45);color:var(--accent-deep);font-size:11.5px;font-weight:700;border-radius:5px;padding:4px 9px">早鳥優惠中 · 11/20（含）前報名，不限身份自動適用下方優惠價</span>
       </div>
       <div class="slot-pick" id="slotPick">
         <label class="slot-opt" data-slot="morning">
@@ -306,7 +307,7 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
       <div class="fg full">
         <label for="referrer">推薦人姓名（選填）</label>
         <input type="text" id="referrer" name="referrer" maxlength="20" placeholder="推薦您報名的朋友姓名">
-        <span style="font-size:11px;color:var(--text-muted);margin-top:3px">推薦人須為本營隊的報名者。經我們確認後，您與推薦人<strong>雙方各再減 $500</strong>（半天班 $250），此優惠<strong>可與上方優惠身份疊加</strong>。<strong>本項以退款方式退還</strong>：請先依繳費通知上的金額完成轉帳，我們核對推薦關係後會主動與您聯繫辦理退款，不會在轉帳金額中先行折抵。</span>
+        <span style="font-size:11px;color:var(--text-muted);margin-top:3px">推薦人須為本營隊的報名者。經我們確認後，<strong>您和推薦人皆會得到 $500 的折扣</strong>（半天班 $250），此優惠<strong>可與上方優惠身份疊加</strong>。<strong>本項以退款方式退還</strong>：請先依繳費通知上的金額完成轉帳，我們核對推薦關係後會主動與您聯繫辦理退款，不會在轉帳金額中先行折抵。</span>
       </div>
       <div class="group-box" id="groupBox" style="display:none">
         <div class="gb-title">團報學員名單</div>
@@ -442,6 +443,9 @@ if (new Date() > EARLY_BIRD_END) {
   // 優惠條件說明：早鳥已過，只剩台大教職員子女與團報
   const pn = document.getElementById('promoNote');
   if (pn) pn.textContent = '早鳥已截止。剩餘兩種身份擇一適用，彼此不可疊加：台大教職員子女／團體報名（5 人以上，各自完成報名）。';
+  // 早鳥期間才顯示時段上方的提示標籤，過期後移除
+  const eb = document.getElementById('earlyBirdBadge');
+  if (eb) eb.style.display = 'none';
 }
 
 // 時段選擇：視覺選中 + 整天才顯示午餐
