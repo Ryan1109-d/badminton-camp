@@ -55,6 +55,66 @@ const COL = {
 const NOTICE_COL = 26;   // 繳費通知（1-based）
 const SYSMSG_COL = 27;   // 系統訊息（1-based）
 
+// 標題列應有的 27 欄，順序即寫入順序。checkSetup() 會拿它逐欄比對。
+const EXPECTED_HEADERS = [
+  '報名時間','梯次','時段','學員姓名','性別','年齡','年級','收信信箱','緊急聯絡人','緊急聯絡人電話',
+  '繳款人姓名','繳款人電話','繳款人信箱','優惠身份','推薦人','午餐','狀態','團報成員','衣服尺寸',
+  '備註','照片同意','健康狀況','健康說明','緊急醫療授權','法定代理人聲明','繳費通知','系統訊息'
+];
+
+/**
+ * 取得報名分頁。找不到時丟出「講得出原因」的錯誤，
+ * 而不是讓後續程式碰到 null 之後噴 Cannot read properties of null。
+ */
+function getSheet_() {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
+  if (!sheet) {
+    const names = ss.getSheets().map(s => '「' + s.getName() + '」').join('、');
+    throw new Error('找不到分頁「' + CONFIG.SHEET_NAME + '」。這個試算表現有的分頁是：' + names +
+                    '。請把報名分頁改名為「' + CONFIG.SHEET_NAME + '」（前後不能有空白），' +
+                    '或改掉 CONFIG.SHEET_NAME。');
+  }
+  return sheet;
+}
+
+/**
+ * 設定自我檢查。部署完、改完 Sheet 之後手動執行這個，
+ * 比送一筆測試報名安全（不會寫資料、不會寄信）。
+ */
+function checkSetup() {
+  const out = [];
+  try {
+    const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+    out.push('✅ SHEET_ID 可開啟：' + ss.getName());
+    const sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
+    if (!sheet) {
+      out.push('❌ 找不到分頁「' + CONFIG.SHEET_NAME + '」');
+      out.push('   現有分頁：' + ss.getSheets().map(s => s.getName()).join('、'));
+    } else {
+      out.push('✅ 分頁「' + CONFIG.SHEET_NAME + '」存在');
+      const lastCol = sheet.getLastColumn();
+      const headers = lastCol ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
+      out.push((headers.length === EXPECTED_HEADERS.length ? '✅' : '❌') +
+               ' 標題列欄數 ' + headers.length + '（應為 ' + EXPECTED_HEADERS.length + '）');
+      EXPECTED_HEADERS.forEach(function (h, i) {
+        const actual = String(headers[i] == null ? '' : headers[i]).trim();
+        if (actual !== h) {
+          out.push('   ⚠️ 第 ' + (i + 1) + ' 欄應為「' + h + '」，實際是「' + (actual || '(空白)') + '」');
+        }
+      });
+      out.push('   目前資料筆數：' + Math.max(0, sheet.getLastRow() - 1));
+    }
+  } catch (e) {
+    out.push('❌ ' + e.message);
+  }
+  out.push(paymentIsPlaceholder() ? '⚠️ 收款資訊仍是測試值，繳費通知會被擋下'
+                                  : '✅ 收款資訊已設定，繳費通知可正常寄出');
+  const msg = out.join('\n');
+  Logger.log(msg);
+  return msg;
+}
+
 /** 給 Sheet 儲存格用：前置單引號讓 Sheets 視為純文字，防公式注入 */
 function safeCell(v, maxLen) {
   var s = String(v == null ? '' : v).replace(/[\u0000-\u001F\u007F]/g, ' ').trim();
@@ -72,6 +132,7 @@ function doPost(e) {
   if (!lock.tryLock(10000)) {
     return jsonResponse({ status: 'error', message: '系統忙碌中，請稍後再送出一次' });
   }
+  const t0 = Date.now();
   try {
     const data = JSON.parse(e.postData.contents);
     // ── 防濫用 1：honeypot（欄名須與 signup.html 的 .hp-field 一致）──
@@ -162,8 +223,9 @@ function doPost(e) {
       medical:      data.medicalConsent ? '同意' : '',
       guardian:     data.guardianConsent ? '同意' : ''
     };
-    const sheet = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(CONFIG.SHEET_NAME);
+    const sheet = getSheet_();
     const rows = sheet.getDataRange().getValues();
+    const tRead = Date.now();
     // ---- 重複報名檢查（用淨化後的值比對）----
     for (let i = 1; i < rows.length; i++) {
       if (String(rows[i][COL.EMAIL]).trim() === clean.email &&
@@ -201,6 +263,7 @@ function doPost(e) {
       clean.health, clean.healthDetail, clean.medical, clean.guardian,
       '', ''   // 繳費通知、系統訊息
     ]);
+    const tWrite = Date.now();
     // ---- 寫入成功，此時才記錄冷卻 ----
     cache.put(rateKey, '1', 600);
     // ---- 寄信：失敗不得讓家長看到「送出失敗」 ----
@@ -210,9 +273,17 @@ function doPost(e) {
       sheet.getRange(sheet.getLastRow(), SYSMSG_COL)
            .setValue('寄信失敗：' + safeCell(mailErr.message, 200));
     }
+    // 效能量測：在 Apps Script 的「執行記錄」可看到每段耗時，用來判斷慢在哪
+    Logger.log('doPost 耗時 ms｜讀 Sheet ' + (tRead - t0) +
+               '、寫入 ' + (tWrite - tRead) +
+               '、寄信 ' + (Date.now() - tWrite) +
+               '、總計 ' + (Date.now() - t0));
     return jsonResponse({ status: 'ok', waitlist: isWaitlist });
   } catch (err) {
-    return jsonResponse({ status: 'error', message: err.message });
+    // 內部錯誤不原樣回給家長（可能含 Sheet 結構等資訊）；細節記進執行記錄供排查
+    Logger.log('doPost 失敗：' + (err && err.stack ? err.stack : err));
+    return jsonResponse({ status: 'error',
+      message: '系統忙線或發生問題，請稍後再試一次，或直接來信 ' + CONFIG.REPLY_EMAIL + ' 由我們協助報名。' });
   } finally {
     lock.releaseLock();
   }
@@ -393,7 +464,7 @@ function sendPaymentNotice() {
     throw new Error('收款資訊仍是測試值，已中止。請先把 CONFIG.PAYMENT 換成真實資料，' +
                     '或改用 previewPaymentNotice() 預覽。');
   }
-  const sheet = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(CONFIG.SHEET_NAME);
+  const sheet = getSheet_();
   const rows = sheet.getDataRange().getValues();
   let sent = 0, skipped = 0;
   for (let i = 1; i < rows.length; i++) {
@@ -476,7 +547,7 @@ function dailyBackup() {
 // ══════════════════════════════════════════
 function sendCancelNotice(sessionName) {
   if (!sessionName) throw new Error('請傳入梯次名稱，例如 sendCancelNotice("第一梯 2027/1/25–1/29")');
-  const sheet = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(CONFIG.SHEET_NAME);
+  const sheet = getSheet_();
   const rows = sheet.getDataRange().getValues();
   let sent = 0;
   for (let i = 1; i < rows.length; i++) {

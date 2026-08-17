@@ -619,8 +619,12 @@ form.addEventListener('submit', async (e) => {
     groupMembers: ['gm1','gm2','gm3','gm4','gm5'].map(id => document.getElementById(id).value.trim()).filter(Boolean).join('、') || '—',
     submittedAt: new Date().toISOString()
   };
+  // ---- 送出前確認：先給家長看一次系統試算的費用與填寫內容 ----
+  if (!previewConfirmed) { showPreview(data); return; }
+  previewConfirmed = false;
+
   btn.disabled = true;
-  btn.textContent = '送出中…';
+  btn.textContent = '送出中…（約需 5–10 秒，請勿關閉視窗）';
   try {
     if (GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
       throw new Error('GAS_URL 尚未設定');
@@ -648,6 +652,98 @@ form.addEventListener('submit', async (e) => {
     btn.textContent = '送出報名 →';
   }
 });
+
+/* ===== 送出前的費用試算與確認 =====
+   前端試算只是給家長看的預估，計算規則必須與 gas-backend.js 的 calcAmount 一致。
+   注意：推薦人優惠「不」從轉帳金額扣除，走事後退款，這裡也照同樣邏輯呈現。 */
+let previewConfirmed = false;
+
+function estimateFee(d) {
+  const EARLY_END = new Date('2026-11-20T23:59:59+08:00');
+  const early = new Date() <= EARLY_END;
+  const hasStatus = early || d.discount === '團報' || d.discount === '台大教職員';
+  const hasRef = !!(d.referrer && d.referrer !== '—');
+  const full = d.slot === '整天班（09:00–17:00）';
+  const list = full ? 8200 : 4100;
+  const step = full ? 500 : 250;
+  const lines = [];
+  if (hasStatus) lines.push([early ? '早鳥優惠（11/20 前報名）' : ('優惠身份（' + d.discount + '）'), -step]);
+  const base = list - (hasStatus ? step : 0);
+  const meal = (full && d.lunch.indexOf('代訂') >= 0) ? 500 : 0;
+  return { list: list, base: base, meal: meal, transfer: base + meal,
+           refundable: hasRef ? step : 0, referrer: d.referrer, lines: lines };
+}
+
+function showPreview(d) {
+  const f = estimateFee(d);
+  const money = n => 'NT$ ' + n.toLocaleString();
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const row = (label, value) =>
+    '<div style="display:flex;gap:.8rem;padding:.5rem 0;border-bottom:.5px solid var(--border-soft);font-size:13px">' +
+    '<div style="min-width:96px;color:var(--text-muted);flex-shrink:0">' + label + '</div>' +
+    '<div style="color:var(--text-2);font-weight:500;word-break:break-all">' + (value || '—') + '</div></div>';
+
+  const feeLines = f.lines.map(l =>
+    '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-muted);padding:1px 0">' +
+    '<span>' + esc(l[0]) + '</span><span>−' + Math.abs(l[1]).toLocaleString() + '</span></div>').join('');
+
+  const m = document.createElement('div');
+  m.id = 'previewModal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(48,24,4,.72);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto';
+  m.innerHTML =
+    '<div style="background:#fff;border-radius:14px;padding:1.6rem 1.5rem;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 16px 48px rgba(60,26,4,.35)">' +
+      '<div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:.3rem">請確認報名資訊</div>' +
+      '<p style="font-size:12.5px;color:var(--text-muted);line-height:1.7;margin-bottom:1.1rem">確認後才會正式送出，請先核對一次。</p>' +
+
+      '<div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--accent);margin:.9rem 0 .2rem">學員</div>' +
+      row('姓名', esc(d.studentName)) + row('性別', esc(d.gender)) + row('年齡', esc(d.age) + ' 歲') +
+      row('衣服尺寸', esc(d.shirtSize)) +
+
+      '<div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--accent);margin:.9rem 0 .2rem">聯絡</div>' +
+      row('收信信箱', esc(d.email)) + row('緊急聯絡人', esc(d.emgName)) + row('緊急電話', esc(d.emgPhone)) +
+      row('繳款人', esc(d.payerName)) + row('繳款人電話', esc(d.payerPhone)) + row('繳款人信箱', esc(d.payerEmail)) +
+
+      '<div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--accent);margin:.9rem 0 .2rem">報名選擇</div>' +
+      row('梯次', esc(d.session)) + row('時段', esc(d.slot)) + row('優惠身份', esc(d.discount)) +
+      row('推薦人', d.referrer ? esc(d.referrer) : '未填') +
+      row('午餐', esc(d.lunch)) +
+      (d.groupMembers && d.groupMembers !== '—' ? row('團報成員', esc(d.groupMembers)) : '') +
+      row('健康狀況', esc(d.healthStatus) + (d.healthDetail && d.healthDetail !== '—' ? '：' + esc(d.healthDetail) : '')) +
+      row('照片使用', esc(d.photoConsent)) +
+      (d.notes && d.notes !== '—' ? row('備註', esc(d.notes)) : '') +
+
+      '<div style="margin-top:1.1rem;background:rgba(224,123,31,.07);border:.5px solid rgba(224,123,31,.32);border-radius:10px;padding:.9rem 1rem">' +
+        '<div style="font-size:11.5px;color:var(--text-muted);margin-bottom:.35rem">系統試算費用</div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-muted);padding:1px 0"><span>原價</span><span>' + f.list.toLocaleString() + '</span></div>' +
+        feeLines +
+        (f.meal ? '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-muted);padding:1px 0"><span>代訂午餐（五天）</span><span>+500</span></div>' : '') +
+        '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:.5rem;padding-top:.5rem;border-top:.5px solid rgba(224,123,31,.25)">' +
+          '<span style="font-size:12.5px;color:var(--text-2);font-weight:600">應轉帳金額</span>' +
+          '<span style="font-size:21px;font-weight:800;color:var(--accent-deep)">' + money(f.transfer) + '</span></div>' +
+        (f.refundable
+          ? '<div style="margin-top:.6rem;padding-top:.6rem;border-top:.5px solid rgba(224,123,31,.25);font-size:11.5px;color:var(--text-muted);line-height:1.65">' +
+            '推薦人「' + esc(f.referrer) + '」經確認也完成報名後，可申請退還 <b>NT$ ' + f.refundable.toLocaleString() + '</b>。' +
+            '此優惠<b>不含</b>在上方轉帳金額內，請先依上方金額轉帳，我們核對後會主動與您聯繫辦理退款。</div>'
+          : '') +
+        '<div style="font-size:11.5px;color:var(--text-muted);margin-top:.5rem;line-height:1.65">這是系統依您填寫的內容自動試算的結果，<b>實際金額以繳費通知為準</b>。如有需要確認的地方，我們會主動與您聯繫。確定開班前不會收取任何費用。</div>' +
+      '</div>' +
+
+      '<div style="display:flex;gap:.7rem;margin-top:1.3rem">' +
+        '<button type="button" id="pvBack" style="flex:1;background:transparent;border:.5px solid var(--border);color:var(--text-body);border-radius:8px;padding:.8rem;cursor:pointer;font-family:inherit;font-size:13.5px">返回修改</button>' +
+        '<button type="button" id="pvGo" style="flex:2;background:var(--accent);border:none;color:#fff;border-radius:8px;padding:.8rem;cursor:pointer;font-weight:700;font-family:inherit;font-size:14px">確認送出 →</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(m);
+  document.body.style.overflow = 'hidden';
+  const close = () => { m.remove(); document.body.style.overflow = ''; };
+  document.getElementById('pvBack').onclick = close;
+  document.getElementById('pvGo').onclick = () => {
+    close();
+    previewConfirmed = true;
+    form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
+  };
+}
 </script>
 </body>
 </html>
