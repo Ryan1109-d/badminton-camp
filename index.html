@@ -226,6 +226,31 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .ph-spacer{height:25px}
 .promo-note{margin-top:1.4rem;background:var(--card);border:.5px solid var(--border);border-radius:10px;padding:1.15rem 1.4rem;font-size:13px;color:var(--text-body);line-height:1.85}
 .promo-note b{color:var(--navy)}
+/* 費用對照表（比照夏令營寫法：三段價格一次看完） */
+.pricing-wrap{margin-top:1.7rem;background:var(--card);border:.5px solid var(--border);border-radius:14px;overflow:hidden}
+.pricing-header{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;background:var(--navy);color:#fff;padding:.85rem 1.4rem;font-size:13px;font-weight:700;text-align:center}
+.pricing-header div:first-child{text-align:left}
+.pricing-row{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;padding:1.05rem 1.4rem;border-top:.5px solid var(--border-soft);align-items:center;text-align:center}
+.pricing-row .label{text-align:left;font-size:13.5px;color:var(--text-body);font-weight:500;line-height:1.5}
+.pricing-row .label-sub{display:block;font-size:11.5px;color:var(--text-muted);font-weight:400;margin-top:2px}
+.pricing-row .price{font-family:'Noto Serif TC',serif;font-weight:900;font-size:17px;color:var(--text-2)}
+.pricing-row.discount{background:rgba(224,123,31,.05)}
+.pricing-row.discount .price{color:var(--blue)}
+.pricing-row.referral{background:rgba(224,123,31,.11)}
+.pricing-row.referral .price{color:var(--navy-deep);font-size:19px}
+.discount-note{padding:.95rem 1.4rem;border-top:.5px solid var(--border-soft);font-size:12px;color:var(--text-muted);line-height:1.75}
+@media(max-width:620px){
+  .pricing-header,.pricing-row{grid-template-columns:1.4fr 1fr 1fr 1fr;padding-left:.85rem;padding-right:.85rem;font-size:12px}
+  .pricing-row .price{font-size:15px}
+  .pricing-row.referral .price{font-size:16px}
+}
+/* 推薦人優惠獨立一格 */
+.referral-box{margin-top:1rem;background:linear-gradient(135deg,rgba(168,72,10,.05),rgba(224,123,31,.09));border:.5px solid rgba(224,123,31,.45);border-radius:10px;padding:1.25rem 1.4rem}
+.referral-title{font-family:'Noto Serif TC',serif;font-size:16px;font-weight:900;color:var(--navy-deep);margin-bottom:.5rem;letter-spacing:.02em}
+.referral-txt{font-size:13px;color:var(--text-body);line-height:1.85}
+.referral-txt + .referral-txt{margin-top:.5rem}
+.term-note{margin-top:1rem;font-size:12.5px;color:var(--text-muted);line-height:1.85}
+.term-note b{color:var(--text-2)}
 .refund-box{margin-top:1rem;background:var(--card);border:.5px solid var(--border);border-radius:10px;padding:1.25rem 1.4rem}
 .refund-title{font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:.85rem}
 .refund-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
@@ -422,18 +447,23 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
   <div class="sec-inner">
     <div class="reveal">
       <div class="sl">收費方案</div>
-      <div class="st">三種時段，兩檔價格</div>
-      <p class="ss">半天適合作息彈性的家庭；整天班訓練最完整，也是最完整的寒假托育方案。每張方案都同時標示優惠價與原價。</p>
+      <div class="st">三種時段，三段價格</div>
+      <p class="ss">半天班適合作息彈性的家庭，整天班訓練最完整。下表同時列出一般報名價、優惠價，以及再加計推薦人優惠後的最低價。</p>
     </div>
-    <div class="pgrid">
-      <div class="pc reveal"><span class="ptag ghost">半天</span><div class="pdesc">早上班　09:00–12:00</div><div class="price-block" data-reg="$4,100" data-dis="$3,850"><div class="pnum"><span class="plabel">優惠價</span>$3,850</div><div class="porig">原價 <b>$4,100</b></div><div class="pcond">11/20 前報名即享優惠價</div></div><div class="pnote">每人・五天</div></div>
-      <div class="pc hi reveal d1"><span class="ptag">最完整 · 整天</span><div class="pdesc">整天班　09:00–17:00（含午休）</div><div class="price-block" data-reg="$8,200" data-dis="$7,700"><div class="pnum"><span class="plabel">優惠價</span>$7,700</div><div class="porig">原價 <b>$8,200</b></div><div class="pcond">11/20 前報名即享優惠價</div></div><div class="pnote">每人・五天</div></div>
-      <div class="pc reveal d2"><span class="ptag ghost">半天</span><div class="pdesc">下午班　14:00–17:00</div><div class="price-block" data-reg="$4,100" data-dis="$3,850"><div class="pnum"><span class="plabel">優惠價</span>$3,850</div><div class="porig">原價 <b>$4,100</b></div><div class="pcond">11/20 前報名即享優惠價</div></div><div class="pnote">每人・五天</div></div>
+    <div class="pricing-wrap reveal">
+      <div class="pricing-header"><div>方案</div><div>早上班</div><div>下午班</div><div>整天班</div></div>
+      <div class="pricing-row"><div class="label">一般報名</div><div class="price">$4,100</div><div class="price">$4,100</div><div class="price">$8,200</div></div>
+      <div class="pricing-row discount"><div class="label">優惠價<span class="label-sub" id="promoSub">早鳥／台大教職員子女／團報，擇一</span></div><div class="price">$3,850</div><div class="price">$3,850</div><div class="price">$7,700</div></div>
+      <div class="pricing-row referral"><div class="label">優惠價 ＋ 推薦人<span class="label-sub">兩項併用後的最低價</span></div><div class="price">$3,600</div><div class="price">$3,600</div><div class="price">$7,200</div></div>
+      <div class="discount-note">早上班 09:00–12:00　·　下午班 14:00–17:00　·　整天班 09:00–17:00（含午休）　·　價格為每人五天全程</div>
     </div>
     <div class="promo-note reveal">
-      <span id="promoList"><b>三種優惠身份，擇一享優惠價（彼此不可疊加）：</b>早鳥（11/20 前報名自動適用）／台大教職員子女／團體報名（5 人以上，各自完成報名）。</span><br>
-      <b>推薦人優惠可與上述疊加：</b>報名表填寫推薦人姓名，經確認推薦人也完成報名後，<b>您和推薦人皆會得到折扣</b>（整天班 $500、半天班 $250）。<b>這筆優惠以退款方式退還</b>，不在轉帳金額內先折抵。<br>
-      <b>開班門檻 15 人</b>，確認開班後才寄送繳費通知，未達門檻不收取任何費用。<b>最終報名截止 1/10。</b>
+      <span id="promoList"><b>優惠身份共三種，擇一適用，彼此不可併用：</b>早鳥（11/20 前完成報名，系統自動適用）／台大教職員子女／團體報名（5 人以上，各自完成報名）。</span>
+    </div>
+    <div class="referral-box reveal">
+      <div class="referral-title">使用優惠價，再折 $500</div>
+      <p class="referral-txt">於報名表填寫推薦人姓名，推薦人須為本營隊的報名者。經確認後，<b>您與推薦人各折抵 $500</b>（半天班為各折抵 $250）。本項<b>可與上方優惠價併用</b>，整天班最低 $7,200、半天班最低 $3,600。</p>
+      <p class="referral-txt">此優惠以<b>退款方式辦理</b>：請先依繳費通知上的金額完成轉帳，我們核對推薦關係後另行退還，不於轉帳金額中先行折抵。</p>
     </div>
     <div class="refund-box reveal">
       <div class="refund-title">退費規則（繳費後）</div>
@@ -446,6 +476,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
       <div class="refund-note">單日缺席可與教練協調擇期補課，惟不提供單日退費，費用以整梯計算。如遇天災（颱風、地震等），依台北市政府停課公告辦理，停課日將另行協調補課或按比例退費。</div>
     </div>
   </div>
+    <p class="term-note reveal"><b>開班門檻 15 人。</b>確認開班後才會寄送繳費通知，未達門檻不收取任何費用。<b>報名截止 2027/1/10（日）</b>，額滿後可登記候補。</p>
 </section>
 
 <section class="sec alt" id="faq">
@@ -502,18 +533,14 @@ const io = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.15 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-// 早鳥截止後，價格呈現自動改以原價為主
+// 早鳥截止後，更新優惠身份說明（價格表三段固定顯示，不需對調）
 // 註：此處僅影響「顯示」；實際收費由後端依報名時間計算，不受瀏覽器時鐘影響
 const EARLY_BIRD_END = new Date('2026-11-20T23:59:59+08:00');
 if (new Date() > EARLY_BIRD_END) {
-  document.querySelectorAll('.price-block').forEach(b => {
-    const reg = b.dataset.reg, dis = b.dataset.dis;
-    b.querySelector('.pnum').innerHTML = '<span class="plabel">原價</span>' + reg;
-    b.querySelector('.porig').innerHTML = '優惠價 <b>' + dis + '</b>';
-    b.querySelector('.pcond').textContent = '台大教職員子女・5 人以上團報 適用優惠價';
-  });
   const pl = document.getElementById('promoList');
-  if (pl) pl.innerHTML = '<b>兩種優惠身份，擇一享優惠價（彼此不可疊加）：</b>台大教職員子女／團體報名（5 人以上，各自完成報名）。';
+  if (pl) pl.innerHTML = '<b>優惠身份共兩種，擇一適用，彼此不可併用：</b>台大教職員子女／團體報名（5 人以上，各自完成報名）。早鳥優惠已於 11/20 截止。';
+  const ps = document.getElementById('promoSub');
+  if (ps) ps.textContent = '台大教職員子女／團報，擇一';
 }
 // 場地照片放大檢視
 const lb=document.getElementById('lightbox'),lbImg=document.getElementById('lightboxImg'),lbCap=document.getElementById('lightboxCap');
