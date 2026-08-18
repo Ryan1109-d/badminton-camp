@@ -133,6 +133,46 @@ function lineSection() {
          '※ 此連結僅提供給已報名的家長，請勿轉發給無關人士。' + '\n';
 }
 
+/**
+ * 新報名通知（寄給 Stay Young 自己，不是家長）。
+ * 主旨開頭固定帶【羽球】，兩個營隊的通知在收件匣裡不會混淆。
+ * 這封信寄失敗絕不能影響報名結果，呼叫端一律包在 try/catch 內。
+ */
+function notifyOwner_(data, clean, status, seq) {
+  const subject = '【羽球】新報名　' + status + ' 第 ' + seq + ' 位　' +
+                  safeText(clean.studentName, 20);
+  const sheetUrl = 'https://docs.google.com/spreadsheets/d/' + CONFIG.SHEET_ID + '/edit';
+  const ref = String(clean.referrer || '—');
+  const body =
+    CONFIG.CAMP_NAME + '\n' +
+    '─────────────────\n' +
+    '狀態：' + status + '（同梯次第 ' + seq + ' 位，上限 ' + CONFIG.CAPACITY + '）\n' +
+    '梯次：' + safeText(data.session, 40) + '\n' +
+    '時段：' + safeText(data.slot, 40) + '\n' +
+    '學員：' + safeText(clean.studentName, 20) +
+      '（' + safeText(clean.gender, 20) + '，' + safeText(clean.age, 20) + ' 歲）\n' +
+    '收信信箱：' + safeText(clean.email, 254) + '\n' +
+    '緊急聯絡人：' + safeText(clean.emgName, 20) + '（' + safeText(clean.emgPhone, 15) + '）\n' +
+    '繳款人：' + safeText(clean.payerName, 20) + '（' + safeText(clean.payerPhone, 15) + '）\n' +
+    '─────────────────\n' +
+    '優惠身份：' + safeText(clean.discount, 20) + '\n' +
+    '推薦人：' + safeText(ref, 20) + (ref !== '—' ? '　← 需人工核對是否也已報名' : '') + '\n' +
+    '午餐：' + safeText(clean.lunch, 30) + '\n' +
+    '衣服尺寸：' + safeText(clean.shirtSize, 20) + '\n' +
+    '健康狀況：' + safeText(clean.health, 20) +
+      (String(clean.health).trim() === '有特殊狀況'
+        ? '　⚠️ ' + safeText(clean.healthDetail, 200) : '') + '\n' +
+    (String(clean.notes || '—') !== '—' ? '備註：' + safeText(clean.notes, 200) + '\n' : '') +
+    '─────────────────\n' +
+    '報名名單：' + sheetUrl;
+  MailApp.sendEmail({
+    to: CONFIG.REPLY_EMAIL,
+    subject: subject,
+    body: body,
+    name: 'Stay Young 報名系統'
+  });
+}
+
 /** 給 Sheet 儲存格用：前置單引號讓 Sheets 視為純文字，防公式注入 */
 function safeCell(v, maxLen) {
   var s = String(v == null ? '' : v).replace(/[\u0000-\u001F\u007F]/g, ' ').trim();
@@ -291,10 +331,18 @@ function doPost(e) {
       sheet.getRange(sheet.getLastRow(), SYSMSG_COL)
            .setValue('寄信失敗：' + safeCell(mailErr.message, 200));
     }
+    const tParentMail = Date.now();
+    // ---- 通知自己有新報名（失敗不影響報名，也不寫進系統訊息欄）----
+    try {
+      notifyOwner_(data, clean, status, sessionCount + 1);
+    } catch (notifyErr) {
+      Logger.log('新報名通知寄送失敗：' + notifyErr);
+    }
     // 效能量測：在 Apps Script 的「執行記錄」可看到每段耗時，用來判斷慢在哪
     Logger.log('doPost 耗時 ms｜讀 Sheet ' + (tRead - t0) +
                '、寫入 ' + (tWrite - tRead) +
-               '、寄信 ' + (Date.now() - tWrite) +
+               '、家長信 ' + (tParentMail - tWrite) +
+               '、通知信 ' + (Date.now() - tParentMail) +
                '、總計 ' + (Date.now() - t0));
     return jsonResponse({ status: 'ok', waitlist: isWaitlist });
   } catch (err) {

@@ -39,7 +39,7 @@ https://ntu-badminton.stayyounglab.com ｜ 隸屬 [Stay Young](https://stayyoung
 
 **退費**：開課 15 天前全額｜前 6–14 天 90%｜前 5 天內 70%｜開課後不退。
 
-**午餐費 500 元不併入轉帳金額** —— 開課第一天直接交給教練，繳費通知信會另起一行說明。
+**午餐費 500 元「有」併入轉帳金額**（僅整天班可代訂）—— 本營隊金流不經學校、不被抽成，與足球營相反；足球營是不併入、開課第一天現金交給教練。
 
 ### 價格依日期自動切換
 
@@ -77,6 +77,7 @@ HTML 直接寫早鳥版本（沒有 JS 也讀得到正確價格），JS 只在�
 |---|---|
 | `doPost` | 接收報名，寫入 Sheet、判定正取／候補、寄確認信 |
 | `sendConfirmEmail` / `sendWaitlistEmail` | 報名確認信／候補通知信 |
+| `notifyOwner_` | 每筆新報名寄一封通知到 stayyoung985，主旨帶【羽球】以免與足球混淆。寄失敗不影響報名 |
 | `calcAmount` / `buildPaymentBody` | 依報名時間、時段、優惠身份與推薦人算金額、組繳費通知內容。回傳的 `refundable` 是推薦人優惠金額，**不含在 `total` 內**，繳費信會另起一段說明退款流程 |
 | `previewPaymentNotice` | **預覽**繳費通知（不寄出），上線前先跑這個 |
 | `sendPaymentNotice` | 寄繳費通知 |

@@ -244,11 +244,21 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
   .pricing-row .price{font-size:15px}
   .pricing-row.referral .price{font-size:16px}
 }
-/* 推薦人優惠獨立一格 */
-.referral-box{margin-top:1rem;background:linear-gradient(135deg,rgba(168,72,10,.05),rgba(224,123,31,.09));border:.5px solid rgba(224,123,31,.45);border-radius:10px;padding:1.25rem 1.4rem}
-.referral-title{font-family:'Noto Serif TC',serif;font-size:16px;font-weight:900;color:var(--navy-deep);margin-bottom:.5rem;letter-spacing:.02em}
-.referral-txt{font-size:13px;color:var(--text-body);line-height:1.85}
-.referral-txt + .referral-txt{margin-top:.5rem}
+/* 推薦人優惠：主打賣點，做成深色強調帶 */
+.referral-hero{margin-top:1.1rem;position:relative;overflow:hidden;border-radius:14px;padding:1.9rem 1.8rem;background:linear-gradient(135deg,#7a3206 0%,#a8480a 52%,#d4761c 100%);color:#fff;box-shadow:0 14px 34px rgba(122,50,6,.26)}
+.referral-hero::after{content:'';position:absolute;top:-80px;right:-60px;width:240px;height:240px;background:radial-gradient(circle,rgba(247,192,122,.32),transparent 68%);border-radius:50%;pointer-events:none}
+.rh-badge{display:inline-block;background:#f7c07a;color:#4a2405;font-size:11px;font-weight:700;letter-spacing:.1em;padding:4px 12px;border-radius:99px;margin-bottom:.9rem;position:relative}
+.rh-head{font-family:'Noto Serif TC',serif;font-size:clamp(1.35rem,3.6vw,1.95rem);font-weight:900;line-height:1.45;letter-spacing:.02em;position:relative}
+.rh-amt{color:#ffd9a8}
+.rh-sub{font-size:13.5px;color:#f4ddc4;line-height:1.85;margin-top:.7rem;position:relative}
+.rh-sub b{color:#fff}
+.rh-flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:1.25rem;position:relative}
+.rh-step{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.24);border-radius:8px;padding:.55rem .85rem;font-size:12.5px;color:#fff}
+.rh-n{width:18px;height:18px;border-radius:50%;background:#f7c07a;color:#4a2405;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rh-arrow{color:rgba(255,255,255,.5);font-size:13px}
+.rh-note{font-size:12.5px;color:#ecd3b6;line-height:1.85;margin-top:1.05rem;padding-top:.9rem;border-top:1px solid rgba(255,255,255,.2);position:relative}
+.rh-note b{color:#ffd9a8}
+@media(max-width:560px){.rh-arrow{display:none}.rh-step{width:100%}}
 .term-note{margin-top:1rem;font-size:12.5px;color:var(--text-muted);line-height:1.85}
 .term-note b{color:var(--text-2)}
 .refund-box{margin-top:1rem;background:var(--card);border:.5px solid var(--border);border-radius:10px;padding:1.25rem 1.4rem}
@@ -460,10 +470,18 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
     <div class="promo-note reveal">
       <span id="promoList"><b>優惠身份共三種，擇一適用，彼此不可併用：</b>早鳥（11/20 前完成報名，系統自動適用）／台大教職員子女／團體報名（5 人以上，各自完成報名）。</span>
     </div>
-    <div class="referral-box reveal">
-      <div class="referral-title">使用優惠價，再折 $500</div>
-      <p class="referral-txt">於報名表填寫推薦人姓名，推薦人須為本營隊的報名者。經確認後，<b>您與推薦人各折抵 $500</b>（半天班為各折抵 $250）。本項<b>可與上方優惠價併用</b>，整天班最低 $7,200、半天班最低 $3,600。</p>
-      <p class="referral-txt">此優惠以<b>退款方式辦理</b>：請先依繳費通知上的金額完成轉帳，我們核對推薦關係後另行退還，不於轉帳金額中先行折抵。</p>
+    <div class="referral-hero reveal">
+      <span class="rh-badge">兩人同享 · 可疊加</span>
+      <div class="rh-head">推薦朋友一起報名，<span class="rh-amt">兩人各折 $500</span></div>
+      <p class="rh-sub">不是只有被推薦的人有折扣 —— <b>推薦人與被推薦人雙方都折 $500</b>，兩人合計省下 <b>$1,000</b>（半天班為各折 $250）。</p>
+      <div class="rh-flow">
+        <div class="rh-step"><span class="rh-n">1</span>報名表填寫推薦人姓名</div>
+        <div class="rh-arrow">→</div>
+        <div class="rh-step"><span class="rh-n">2</span>我們核對雙方報名紀錄</div>
+        <div class="rh-arrow">→</div>
+        <div class="rh-step"><span class="rh-n">3</span>以退款方式退還</div>
+      </div>
+      <p class="rh-note">推薦人須為本營隊的報名者。本項<b>可與上方優惠價併用</b>，整天班最低 <b>$7,200</b>、半天班最低 <b>$3,600</b>。<br>此優惠<b>不在轉帳金額內先折抵</b>：請先依繳費通知金額完成轉帳，我們核對推薦關係後另行退還。</p>
     </div>
     <div class="refund-box reveal">
       <div class="refund-title">退費規則（繳費後）</div>
