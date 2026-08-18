@@ -236,13 +236,10 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .pricing-row .price{font-family:'Noto Serif TC',serif;font-weight:900;font-size:17px;color:var(--text-2)}
 .pricing-row.discount{background:rgba(224,123,31,.05)}
 .pricing-row.discount .price{color:var(--blue)}
-.pricing-row.referral{background:rgba(224,123,31,.11)}
-.pricing-row.referral .price{color:var(--navy-deep);font-size:19px}
 .discount-note{padding:.95rem 1.4rem;border-top:.5px solid var(--border-soft);font-size:12px;color:var(--text-muted);line-height:1.75}
 @media(max-width:620px){
   .pricing-header,.pricing-row{grid-template-columns:1.4fr 1fr 1fr 1fr;padding-left:.85rem;padding-right:.85rem;font-size:12px}
   .pricing-row .price{font-size:15px}
-  .pricing-row.referral .price{font-size:16px}
 }
 /* 推薦人優惠：主打賣點，做成深色強調帶 */
 .referral-hero{margin-top:1.1rem;position:relative;overflow:hidden;border-radius:14px;padding:1.9rem 1.8rem;background:linear-gradient(135deg,#7a3206 0%,#a8480a 52%,#d4761c 100%);color:#fff;box-shadow:0 14px 34px rgba(122,50,6,.26)}
@@ -259,7 +256,7 @@ body{font-family:'Noto Sans TC',-apple-system,"PingFang TC","Microsoft JhengHei"
 .rh-note{font-size:12.5px;color:#ecd3b6;line-height:1.85;margin-top:1.05rem;padding-top:.9rem;border-top:1px solid rgba(255,255,255,.2);position:relative}
 .rh-note b{color:#ffd9a8}
 @media(max-width:560px){.rh-arrow{display:none}.rh-step{width:100%}}
-.term-note{margin-top:1rem;font-size:12.5px;color:var(--text-muted);line-height:1.85}
+.term-note{margin-top:1.2rem;font-size:12.5px;color:var(--text-muted);line-height:1.85;text-align:center}
 .term-note b{color:var(--text-2)}
 .refund-box{margin-top:1rem;background:var(--card);border:.5px solid var(--border);border-radius:10px;padding:1.25rem 1.4rem}
 .refund-title{font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:.85rem}
@@ -344,6 +341,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
   <p class="hero-sub">專業教練 1:8–10 分階帶領，讓孩子在台大專業場地裡，五天看得見成長。</p>
   <div class="hero-meta">
     <div class="hmi"><div class="hml">日期</div><div class="hmv">1/25 – 1/29</div></div>
+    <div class="hmi"><div class="hml">彈性接送</div><div class="hmv">08:00 – 18:00</div></div>
     <div class="hmi"><div class="hml">對象</div><div class="hmv">6 – 15 歲</div></div>
     <div class="hmi"><div class="hml">時段</div><div class="hmv">早上／下午／整天</div></div>
     <div class="hmi"><div class="hml">地點</div><div class="hmv">國立台灣大學<span style="display:block;font-size:10px;color:var(--blue);font-weight:700;margin-top:1px">綜合體育館室內場地</span></div></div>
@@ -457,14 +455,13 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
   <div class="sec-inner">
     <div class="reveal">
       <div class="sl">收費方案</div>
-      <div class="st">三種時段，三段價格</div>
-      <p class="ss">半天班適合作息彈性的家庭，整天班訓練最完整。下表同時列出一般報名價、優惠價，以及再加計推薦人優惠後的最低價。</p>
+      <div class="st">三種時段，兩檔價格</div>
+      <p class="ss">半天班適合作息彈性的家庭，整天班訓練最完整。下表列出一般報名價與優惠價；另有推薦人優惠可再折抵，說明於表格下方。</p>
     </div>
     <div class="pricing-wrap reveal">
       <div class="pricing-header"><div>方案</div><div>早上班</div><div>下午班</div><div>整天班</div></div>
       <div class="pricing-row"><div class="label">一般報名</div><div class="price">$4,100</div><div class="price">$4,100</div><div class="price">$8,200</div></div>
       <div class="pricing-row discount"><div class="label">優惠價<span class="label-sub" id="promoSub">早鳥／台大教職員子女／團報，擇一</span></div><div class="price">$3,850</div><div class="price">$3,850</div><div class="price">$7,700</div></div>
-      <div class="pricing-row referral"><div class="label">優惠價 ＋ 推薦人<span class="label-sub">兩項併用後的最低價</span></div><div class="price">$3,600</div><div class="price">$3,600</div><div class="price">$7,200</div></div>
       <div class="discount-note">早上班 09:00–12:00　·　下午班 14:00–17:00　·　整天班 09:00–17:00（含午休）　·　價格為每人五天全程</div>
     </div>
     <div class="promo-note reveal">
@@ -479,9 +476,9 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
         <div class="rh-arrow">→</div>
         <div class="rh-step"><span class="rh-n">2</span>我們核對雙方報名紀錄</div>
         <div class="rh-arrow">→</div>
-        <div class="rh-step"><span class="rh-n">3</span>以退款方式退還</div>
+        <div class="rh-step"><span class="rh-n">3</span>開課首日現場退還現金</div>
       </div>
-      <p class="rh-note">推薦人須為本營隊的報名者。本項<b>可與上方優惠價併用</b>，整天班最低 <b>$7,200</b>、半天班最低 <b>$3,600</b>。<br>此優惠<b>不在轉帳金額內先折抵</b>：請先依繳費通知金額完成轉帳，我們核對推薦關係後另行退還。</p>
+      <p class="rh-note">推薦人須為本營隊的報名者。本項<b>可與上方優惠價併用</b>，整天班最低 <b>$7,200</b>、半天班最低 <b>$3,600</b>。<br>此優惠<b>不在轉帳金額內先折抵</b>：請先依繳費通知金額完成轉帳，<b>折抵金額於開課第一天在報到處以現金退還</b>，不需另外申請。</p>
     </div>
     <div class="refund-box reveal">
       <div class="refund-title">退費規則（繳費後）</div>
@@ -511,6 +508,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
       <div class="faq-i reveal"><button class="faq-q" type="button">報名後何時繳費？<span class="faq-arrow">＋</span></button><div class="faq-a">先報名就好，不用馬上付錢！送出後您會收到一封報名確認信，等報名人數達到開班標準、確定開班之後，我們才會寄繳費通知給您。在確定開班前，我們不會收取任何費用。</div></div>
       <div class="faq-i reveal"><button class="faq-q" type="button">沒收到確認信怎麼辦？<span class="faq-arrow">＋</span></button><div class="faq-a">先麻煩您到「垃圾郵件」或「促銷內容」資料夾找一下，系統信有時會被自動分類過去。如果找過還是沒有，很可能是報名時信箱有誤，請直接來信 stayyoung985@gmail.com 告訴我們孩子的姓名，我們會幫您確認報名狀態並補寄一次，不用擔心報名沒成功。</div></div>
       <div class="faq-i reveal"><button class="faq-q" type="button">額滿後如何候補？<span class="faq-arrow">＋</span></button><div class="faq-a">如果名額滿了，您的報名會自動排進候補名單，一樣不會收任何費用。只要有人取消釋出名額，我們會立刻用 email 通知您，依序遞補。</div></div>
+      <div class="faq-i reveal"><button class="faq-q" type="button">可以早點送來、晚點接回嗎？<span class="faq-arrow">＋</span></button><div class="faq-a">可以。三個時段都提供彈性接送：<b>最早 08:00 就能把孩子送到場館，最晚 18:00 前接回都沒問題</b>。延長的時段一樣由營隊教練在場照管，不另外收費。上午班的孩子中午之後想留下來等家長、下午班的孩子想提早到，都可以，直接跟現場教練說一聲即可。</div></div>
     </div>
   </div>
 </section>
