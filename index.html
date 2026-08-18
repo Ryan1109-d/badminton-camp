@@ -307,9 +307,18 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
   footer{flex-direction:column;text-align:center}
   .fi2{text-align:center}
 }
+/* 頂部早鳥橫幅：早鳥截止後由 JS 自動移除，避免宣告已失效的優惠 */
+.promo-bar{display:flex;align-items:center;justify-content:center;gap:.55rem;flex-wrap:wrap;background:linear-gradient(90deg,#a8480a 0%,#e07b1f 100%);color:#fff;font-size:13px;padding:.62rem 1.2rem;text-decoration:none;text-align:center;line-height:1.65;font-weight:500}
+.promo-bar b{font-weight:900;letter-spacing:.03em}
+.pb-dot{width:7px;height:7px;border-radius:50%;background:#ffd9a8;flex-shrink:0;animation:pbPulse 1.8s ease-in-out infinite}
+@keyframes pbPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.75)}}
+.pb-go{font-weight:700;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+@media(max-width:600px){.promo-bar{font-size:12px;padding:.55rem .85rem}.pb-go{display:none}}
+@media (prefers-reduced-motion: reduce){.pb-dot{animation:none}}
 </style>
 </head>
 <body>
+<a class="promo-bar" href="#pricing"><span class="pb-dot"></span><b>早鳥優惠中</b>　11/20 前報名，不限身份自動享優惠價　·　再填推薦人，雙方各折 $500<span class="pb-go">看收費方案 →</span></a>
 <nav class="nav">
   <div class="nav-left">
     <a class="nav-home" href="https://stayyounglab.com/" title="回到 Stay Young 首頁">
@@ -584,6 +593,16 @@ document.querySelectorAll('.faq-q').forEach((btn, i) => {
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 });
+</script>
+<script>
+// 早鳥截止後自動移除頂部橫幅（僅影響顯示；實際收費由後端依報名時間判定）
+(function(){
+  var end = new Date('2026-11-20T23:59:59+08:00');
+  if (new Date() > end) {
+    var b = document.querySelector('.promo-bar');
+    if (b) b.parentNode.removeChild(b);
+  }
+})();
 </script>
 </body>
 </html>
