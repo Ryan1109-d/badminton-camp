@@ -143,26 +143,33 @@ function notifyOwner_(data, clean, status, seq) {
                   safeText(clean.studentName, 20);
   const sheetUrl = 'https://docs.google.com/spreadsheets/d/' + CONFIG.SHEET_ID + '/edit';
   const ref = String(clean.referrer || '—');
+  const dash = function (v) { var s = safeText(v, 40); return s ? s : '—'; };
+  // 兩個營隊刻意共用同一組欄位與順序，收件匣裡兩封信長得一模一樣；
+  // 該營隊沒有的欄位一律填「—」，不要整行省略，否則行數會對不齊。
   const body =
     CONFIG.CAMP_NAME + '\n' +
     '─────────────────\n' +
     '狀態：' + status + '（同梯次第 ' + seq + ' 位，上限 ' + CONFIG.CAPACITY + '）\n' +
-    '梯次：' + safeText(data.session, 40) + '\n' +
-    '時段：' + safeText(data.slot, 40) + '\n' +
-    '學員：' + safeText(clean.studentName, 20) +
-      '（' + safeText(clean.gender, 20) + '，' + safeText(clean.age, 20) + ' 歲）\n' +
-    '收信信箱：' + safeText(clean.email, 254) + '\n' +
-    '緊急聯絡人：' + safeText(clean.emgName, 20) + '（' + safeText(clean.emgPhone, 15) + '）\n' +
-    '繳款人：' + safeText(clean.payerName, 20) + '（' + safeText(clean.payerPhone, 15) + '）\n' +
+    '梯次：' + dash(data.session) + '\n' +
+    '時段：' + dash(data.slot) + '\n' +
     '─────────────────\n' +
-    '優惠身份：' + safeText(clean.discount, 20) + '\n' +
-    '推薦人：' + safeText(ref, 20) + (ref !== '—' ? '　← 需人工核對是否也已報名' : '') + '\n' +
-    '午餐：' + safeText(clean.lunch, 30) + '\n' +
-    '衣服尺寸：' + safeText(clean.shirtSize, 20) + '\n' +
-    '健康狀況：' + safeText(clean.health, 20) +
+    '學員：' + safeText(clean.studentName, 20) +
+      '（' + dash(clean.gender) + '，' + dash(clean.age) + ' 歲）\n' +
+    '年級：' + dash(clean.grade) + '\n' +
+    '衣服尺寸：' + dash(clean.shirtSize) + '\n' +
+    '健康狀況：' + dash(clean.health) +
       (String(clean.health).trim() === '有特殊狀況'
         ? '　⚠️ ' + safeText(clean.healthDetail, 200) : '') + '\n' +
-    (String(clean.notes || '—') !== '—' ? '備註：' + safeText(clean.notes, 200) + '\n' : '') +
+    '─────────────────\n' +
+    '收信信箱：' + safeText(clean.email, 254) + '\n' +
+    '緊急聯絡人：' + dash(clean.emgName) + '（' + dash(clean.emgPhone) + '）\n' +
+    '繳款人：' + dash(clean.payerName) + '（' + dash(clean.payerPhone) + '）\n' +
+    '─────────────────\n' +
+    '優惠身份：' + dash(clean.discount) + '\n' +
+    '推薦人：' + safeText(ref, 20) + (ref !== '—' ? '　← 需人工核對是否也已報名' : '') + '\n' +
+    '午餐：' + dash(clean.lunch) + '\n' +
+    '團報成員：' + dash(clean.groupMembers) + '\n' +
+    '備註：' + dash(clean.notes) + '\n' +
     '─────────────────\n' +
     '報名名單：' + sheetUrl;
   MailApp.sendEmail({
