@@ -202,22 +202,22 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
           <input type="radio" name="slot" value="早上班（09:00–12:00）">
           <div class="slot-name">早上班</div>
           <div class="slot-time">09:00–12:00 半天</div>
-          <div class="slot-price">優惠價 $3,850</div>
-          <div class="slot-orig">原價 $4,100</div>
+          <div class="slot-price">優惠價 $4,000</div>
+          <div class="slot-orig">原價 $4,250</div>
         </label>
         <label class="slot-opt" data-slot="fullday">
           <input type="radio" name="slot" value="整天班（09:00–17:00）">
           <div class="slot-name">整天班</div>
           <div class="slot-time">09:00–17:00 含午休</div>
-          <div class="slot-price">優惠價 $7,700</div>
-          <div class="slot-orig">原價 $8,200</div>
+          <div class="slot-price">優惠價 $8,000</div>
+          <div class="slot-orig">原價 $8,500</div>
         </label>
         <label class="slot-opt" data-slot="afternoon">
           <input type="radio" name="slot" value="下午班（14:00–17:00）">
           <div class="slot-name">下午班</div>
           <div class="slot-time">14:00–17:00 半天</div>
-          <div class="slot-price">優惠價 $3,850</div>
-          <div class="slot-orig">原價 $4,100</div>
+          <div class="slot-price">優惠價 $4,000</div>
+          <div class="slot-orig">原價 $4,250</div>
         </label>
       </div>
 
@@ -664,7 +664,7 @@ function estimateFee(d) {
   const hasStatus = early || d.discount === '團報' || d.discount === '台大教職員';
   const hasRef = !!(d.referrer && d.referrer !== '—');
   const full = d.slot === '整天班（09:00–17:00）';
-  const list = full ? 8200 : 4100;
+  const list = full ? 8500 : 4250;
   const step = full ? 500 : 250;
   const lines = [];
   if (hasStatus) lines.push([early ? '早鳥優惠（11/20 前報名）' : ('優惠身份（' + d.discount + '）'), -step]);

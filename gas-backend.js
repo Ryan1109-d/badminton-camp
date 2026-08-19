@@ -31,9 +31,9 @@ const CONFIG = {
   // 定價（2026-08-17 起）。兩道折扣互相獨立、可以疊加：
   //   ① 優惠身份：早鳥 / 團報 / 台大教職員（三擇一，彼此不疊加）→ 轉帳時直接折抵
   //   ② 推薦人：報名表填了推薦人姓名 → 開課首日現場以現金退還，不先折抵
-  //   整天 8200 → 7700（身份）→ 7200（再退推薦 500）
-  //   半天 4100 → 3850（身份）→ 3600（再退推薦 250）
-  PRICE: { FULL: 8200, HALF: 4100, STEP_FULL: 500, STEP_HALF: 250 },
+  //   整天 8500 → 8000（身份）→ 7500（再退推薦 500）
+  //   半天 4250 → 4000（身份）→ 3750（再退推薦 250）
+  PRICE: { FULL: 8500, HALF: 4250, STEP_FULL: 500, STEP_HALF: 250 },
   // 家長 LINE 社群邀請連結。⚠️ 真值只填在 Apps Script，不要 commit 進 public repo
   //    （這是可公開加入的邀請網址，落在公開 repo 等於任何人都能加進家長群）。
   //    維持佔位字串時，確認信會自動略過整段 LINE 說明，不會寄出壞掉的連結。
@@ -507,7 +507,7 @@ ${CONFIG.REPLY_EMAIL}`;
 
 /** 預覽：只寄一封範例信給自己，不讀 Sheet、不動任何資料 */
 function previewPaymentNotice() {
-  const amt = { listPrice: CONFIG.PRICE.FULL, base: 7700, meal: 500, total: 8200,
+  const amt = { listPrice: CONFIG.PRICE.FULL, base: 8000, meal: 500, total: 8500,
                 refundable: 500, hasReferrer: true, referrer: '陳小美（範例）',
                 slotLabel: '整天班', breakdown: ['早鳥優惠　−NT$ 500'],
                 label: '早鳥優惠價' };
