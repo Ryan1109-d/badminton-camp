@@ -15,14 +15,21 @@
  *    - 誰可以存取：所有人
  * 5. 複製 Web App URL，貼到 signup.html 的 GAS_URL
  *
- * 狀態欄位邏輯：
- * - 同梯次總報名數（三時段合計）第 1–50 位 → 狀態「正取」，寄報名確認信
- * - 第 51 位起 → 狀態「候補」，寄候補通知信
+ * 狀態欄位邏輯（2026-08-21 改為以「時段」為單位，不再是三時段合計）：
+ * - 名額以時段計算，每個時段上限 CONFIG.CAPACITY 人。
+ * - 整天班同時佔用早上與下午兩個時段的名額。
+ *   因此早上佔用 = 早上班 + 整天班；下午佔用 = 下午班 + 整天班。
+ * - 報名時段還有空位 → 狀態「正取」，寄報名確認信
+ * - 報名時段已額滿   → 狀態「候補」，寄候補通知信
+ *   （報整天班時，只要早上或下午其中一邊滿了就是候補）
+ *
+ * 為什麼要這樣改：場地在同一個時間點最多容納 CAPACITY 人，
+ * 早上與下午是兩批不同的人，本來就該分開算。舊版三時段合計會過早把人推進候補。
  */
 const CONFIG = {
   SHEET_ID: 'YOUR_SHEET_ID_HERE',       // TODO: 換成實際 Sheet ID（只在 Apps Script 填，不要 commit）
   SHEET_NAME: '報名名單',                 // 分頁名稱
-  CAPACITY: 50,                          // 正取上限（三時段合計）
+  CAPACITY: 50,                          // 每個時段的正取上限（不是三時段合計）
   CAMP_NAME: '台灣大學羽球冬令營 2027',
   CAMP_DATE: '2027/1/25（一）– 1/29（五）',
   REPLY_EMAIL: 'stayyoung985@gmail.com',
@@ -66,6 +73,50 @@ const EXPECTED_HEADERS = [
   '備註','照片同意','健康狀況','健康說明','緊急醫療授權','法定代理人聲明','繳費通知','系統訊息'
 ];
 
+// ⚠️ 以下字串必須與 signup.html 的 <input name="slot"> option value 逐字一致，
+//    改前端選項時要同步改這裡，否則合法報名會被擋。
+const SLOT_AM   = '早上班（09:00–12:00）';
+const SLOT_PM   = '下午班（14:00–17:00）';
+const SLOT_FULL = '整天班（09:00–17:00）';
+const VALID_SLOTS = [SLOT_AM, SLOT_FULL, SLOT_PM];
+
+/**
+ * 計算各時段目前的「正取」佔用數。
+ *
+ * 整天班的人同時佔用早上與下午，所以：
+ *   早上佔用 = 早上班人數 + 整天班人數
+ *   下午佔用 = 下午班人數 + 整天班人數
+ *
+ * 回傳的 am / pm / full 是「各時段各自報了幾個人」，
+ * amOcc / pmOcc 才是拿來判斷額滿的佔用數。
+ */
+function countSlots_(rows) {
+  let am = 0, pm = 0, full = 0;
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][COL.STATUS]).trim() !== '正取') continue;
+    const slot = String(rows[i][COL.SLOT]).trim();
+    if (slot === SLOT_AM) am++;
+    else if (slot === SLOT_PM) pm++;
+    else if (slot === SLOT_FULL) full++;
+  }
+  return { am: am, pm: pm, full: full, amOcc: am + full, pmOcc: pm + full };
+}
+
+/** 報這個時段會不會變成候補 */
+function isWaitlisted_(slot, c) {
+  if (slot === SLOT_AM)   return c.amOcc >= CONFIG.CAPACITY;
+  if (slot === SLOT_PM)   return c.pmOcc >= CONFIG.CAPACITY;
+  // 整天班要兩邊都有位子才排得進去
+  return c.amOcc >= CONFIG.CAPACITY || c.pmOcc >= CONFIG.CAPACITY;
+}
+
+/** 這筆報名在該時段是第幾位（通知信用，讓自己一眼看出擠不擠） */
+function seqInSlot_(slot, c) {
+  if (slot === SLOT_AM)   return c.amOcc + 1;
+  if (slot === SLOT_PM)   return c.pmOcc + 1;
+  return Math.max(c.amOcc, c.pmOcc) + 1;
+}
+
 /**
  * 取得報名分頁。找不到時丟出「講得出原因」的錯誤，
  * 而不是讓後續程式碰到 null 之後噴 Cannot read properties of null。
@@ -107,7 +158,14 @@ function checkSetup() {
           out.push('   ⚠️ 第 ' + (i + 1) + ' 欄應為「' + h + '」，實際是「' + (actual || '(空白)') + '」');
         }
       });
-      out.push('   目前資料筆數：' + Math.max(0, sheet.getLastRow() - 1));
+      const n = Math.max(0, sheet.getLastRow() - 1);
+      out.push('   目前資料筆數：' + n);
+      if (n > 0) {
+        const c = countSlots_(sheet.getDataRange().getValues());
+        out.push('   正取佔用｜早上 ' + c.amOcc + '／' + CONFIG.CAPACITY +
+                 '　下午 ' + c.pmOcc + '／' + CONFIG.CAPACITY +
+                 '　（早上班 ' + c.am + '、下午班 ' + c.pm + '、整天班 ' + c.full + '）');
+      }
     }
   } catch (e) {
     out.push('❌ ' + e.message);
@@ -138,7 +196,7 @@ function lineSection() {
  * 主旨開頭固定帶【羽球】，兩個營隊的通知在收件匣裡不會混淆。
  * 這封信寄失敗絕不能影響報名結果，呼叫端一律包在 try/catch 內。
  */
-function notifyOwner_(data, clean, status, seq) {
+function notifyOwner_(data, clean, status, seq, counts) {
   const subject = '【羽球】新報名　' + status + ' 第 ' + seq + ' 位　' +
                   safeText(clean.studentName, 20);
   const sheetUrl = 'https://docs.google.com/spreadsheets/d/' + CONFIG.SHEET_ID + '/edit';
@@ -149,7 +207,8 @@ function notifyOwner_(data, clean, status, seq) {
   const body =
     CONFIG.CAMP_NAME + '\n' +
     '─────────────────\n' +
-    '狀態：' + status + '（同梯次第 ' + seq + ' 位，上限 ' + CONFIG.CAPACITY + '）\n' +
+    '狀態：' + status + '（該時段第 ' + seq + ' 位，每時段上限 ' + CONFIG.CAPACITY +
+      '｜早上 ' + counts.amOcc + '、下午 ' + counts.pmOcc + '）\n' +
     '梯次：' + dash(data.session) + '\n' +
     '時段：' + dash(data.slot) + '\n' +
     '─────────────────\n' +
@@ -243,9 +302,8 @@ function doPost(e) {
       return jsonResponse({ status: 'error', message: '繳款人信箱格式有誤，請確認後再送出' });
     }
     // ---- 時段與優惠資格白名單驗證 ----
-    // ⚠️ 以下字串必須與 signup.html 的 <input name="slot"> / <select id="discount">
-    //    option value 逐字一致，改前端選項時要同步改這裡，否則合法報名會被擋。
-    const VALID_SLOTS = ['早上班（09:00–12:00）', '整天班（09:00–17:00）', '下午班（14:00–17:00）'];
+    // ⚠️ VALID_SLOTS 定義於檔案上方（與 countSlots_ 共用同一組字串）。
+    //    VALID_DISCOUNTS 須與 signup.html 的 <select id="discount"> option value 逐字一致。
     const VALID_DISCOUNTS = ['一般報名', '團報', '台大教職員'];
     if (!VALID_SLOTS.includes(String(data.slot).trim())) {
       return jsonResponse({ status: 'error', message: '報名時段資料有誤，請重新選擇後送出' });
@@ -308,14 +366,11 @@ function doPost(e) {
     if (now > CLOSE_TIME) {
       return jsonResponse({ status: 'error', message: '很抱歉，本梯次報名已截止。如有候補需求請直接來信 stayyoung985@gmail.com' });
     }
-    // ---- 判斷正取或候補（同梯次三時段合計，只計算「正取」）----
-    let sessionCount = 0;
-    for (let i = 1; i < rows.length; i++) {
-      const st = String(rows[i][COL.STATUS]).trim();
-      if (String(rows[i][COL.SESSION]).trim() === clean.session && st === '正取') sessionCount++;
-    }
-    const isWaitlist = sessionCount >= CONFIG.CAPACITY;
+    // ---- 判斷正取或候補（以時段為單位，整天班佔用早上＋下午）----
+    const counts = countSlots_(rows);
+    const isWaitlist = isWaitlisted_(clean.slot, counts);
     const status = isWaitlist ? '候補' : '正取';
+    const seq = seqInSlot_(clean.slot, counts);
     // ---- 寫入 Sheet（共 27 欄）----
     sheet.appendRow([
       new Date(),
@@ -341,7 +396,7 @@ function doPost(e) {
     const tParentMail = Date.now();
     // ---- 通知自己有新報名（失敗不影響報名，也不寫進系統訊息欄）----
     try {
-      notifyOwner_(data, clean, status, sessionCount + 1);
+      notifyOwner_(data, clean, status, seq, counts);
     } catch (notifyErr) {
       Logger.log('新報名通知寄送失敗：' + notifyErr);
     }
@@ -398,9 +453,13 @@ function sendWaitlistEmail(data) {
   const body =
 `您好：
 感謝您為 ${safeText(data.studentName,20)} 報名 ${CONFIG.CAMP_NAME}（${safeText(data.session,40)}／${safeText(data.slot,40)}）。
-目前正取名額已滿，您的報名已列入「候補名單」。
+目前該時段正取名額已滿，您的報名已列入「候補名單」。
 若有名額釋出，我們將立即以 email 通知您，屆時再依信中說明完成報名程序即可。
 候補期間不會收取任何費用。
+
+※ 其他時段可能仍有名額。若您的時間允許調整，歡迎回覆本信告知，
+　 我們可協助改到還有空位的時段。
+
 若有任何問題，歡迎直接回覆本信。
 Stay Young 台灣大學羽球冬令營
 ${CONFIG.REPLY_EMAIL}`;
@@ -459,7 +518,7 @@ function calcAmount(row) {
   const ref = String(row[COL.REFERRER] || '').trim();
   const hasReferrer = ref !== '' && ref !== '—';
   // 精確比對（值已於 doPost 通過白名單驗證，格式固定）
-  const fullDay = String(row[COL.SLOT] || '').trim() === '整天班（09:00–17:00）';
+  const fullDay = String(row[COL.SLOT] || '').trim() === SLOT_FULL;
 
   const listPrice = fullDay ? CONFIG.PRICE.FULL : CONFIG.PRICE.HALF;
   const step      = fullDay ? CONFIG.PRICE.STEP_FULL : CONFIG.PRICE.STEP_HALF;
@@ -519,7 +578,7 @@ function previewPaymentNotice() {
                 slotLabel: '整天班', breakdown: ['早鳥優惠　−NT$ 500'],
                 label: '早鳥優惠價' };
   const body = buildPaymentBody('王小華（範例）', '第一梯 2027/1/25–1/29',
-                                '整天班（09:00–17:00）', amt);
+                                SLOT_FULL, amt);
   MailApp.sendEmail({
     to: CONFIG.REPLY_EMAIL,
     subject: `【預覽】${CONFIG.CAMP_NAME} 繳費通知信`,
