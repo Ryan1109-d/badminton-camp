@@ -41,6 +41,11 @@ const CONFIG = {
   //   整天 8500 → 8000（身份）→ 7500（再退推薦 500）
   //   半天 4250 → 4000（身份）→ 3750（再退推薦 250）
   PRICE: { FULL: 8500, HALF: 4250, STEP_FULL: 500, STEP_HALF: 250 },
+  // 個資保留期限。報名表上寫「活動結束後六個月內刪除」，這個值就是那個承諾的到期日
+  //（營期 1/29 結束 + 6 個月）。purgeOldData() 會拿它當刪除基準。
+  DATA_PURGE_AFTER: '2027-07-29T00:00:00+08:00',
+  // 全域流量上限：每分鐘最多幾筆報名。正常招生不可能超過，超過幾乎必然是腳本灌資料。
+  MAX_SUBMITS_PER_MINUTE: 12,
   // 家長 LINE 社群邀請連結。⚠️ 真值只填在 Apps Script，不要 commit 進 public repo
   //    （這是可公開加入的邀請網址，落在公開 repo 等於任何人都能加進家長群）。
   //    維持佔位字串時，確認信會自動略過整段 LINE 說明，不會寄出壞掉的連結。
@@ -263,8 +268,21 @@ function doPost(e) {
     if (data.contact_pref_2 && String(data.contact_pref_2).trim() !== '') {
       return jsonResponse({ status: 'ok', waitlist: false });
     }
-    // ── 防濫用 2：重複送出保護 ──
     const cache = CacheService.getScriptCache();
+
+    // ── 防濫用 2：全域流量上限 ──
+    // Web App 必須開放「所有人」才能收報名，網址又寫在公開的前端裡，
+    // 等於任何人都能對這個端點灌資料。這裡擋的是「有人寫腳本狂送」，
+    // 讓 Sheet 不會在幾秒內被塞進幾千筆假資料、把真報名淹掉。
+    const minuteKey = 'g_' + Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyyMMddHHmm');
+    const inThisMinute = Number(cache.get(minuteKey) || 0);
+    if (inThisMinute >= CONFIG.MAX_SUBMITS_PER_MINUTE) {
+      Logger.log('全域流量上限觸發：本分鐘已達 ' + inThisMinute + ' 筆');
+      return jsonResponse({ status: 'error',
+        message: '系統忙碌中，請稍候一分鐘再送出一次。若持續失敗，請直接來信 ' + CONFIG.REPLY_EMAIL });
+    }
+
+    // ── 防濫用 3：重複送出保護 ──
     const rateKey = 'rl_' + [
       String(data.email || '').toLowerCase().trim(),
       String(data.studentName || '').trim(),
@@ -384,8 +402,9 @@ function doPost(e) {
       '', ''   // 繳費通知、系統訊息
     ]);
     const tWrite = Date.now();
-    // ---- 寫入成功，此時才記錄冷卻 ----
+    // ---- 寫入成功，此時才記錄冷卻與流量計數 ----
     cache.put(rateKey, '1', 600);
+    cache.put(minuteKey, String(inThisMinute + 1), 120);
     // ---- 寄信：失敗不得讓家長看到「送出失敗」 ----
     try {
       if (isWaitlist) { sendWaitlistEmail(data); } else { sendConfirmEmail(data); }
@@ -659,14 +678,29 @@ function listTriggers() {
   return msg;
 }
 
+/** 備份資料夾名稱。必須與另外兩站分開，否則各站的 slice(14) 會互刪對方的備份 */
+const BACKUP_FOLDER_NAME = 'StayYoung 報名備份_羽球';
+
+/** 取得備份資料夾；新建時直接設成私有 */
+function getBackupFolder_() {
+  const it = DriveApp.getFoldersByName(BACKUP_FOLDER_NAME);
+  if (it.hasNext()) return it.next();
+  const folder = DriveApp.createFolder(BACKUP_FOLDER_NAME);
+  folder.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+  return folder;
+}
+
 function dailyBackup() {
-  // 資料夾必須與足球站分開，否則兩站的 slice(14) 會互刪對方的備份，保留天數砍半
-  const FOLDER_NAME = 'StayYoung 報名備份_羽球';
-  const it = DriveApp.getFoldersByName(FOLDER_NAME);
-  const folder = it.hasNext() ? it.next() : DriveApp.createFolder(FOLDER_NAME);
+  const folder = getBackupFolder_();
   const src = DriveApp.getFileById(CONFIG.SHEET_ID);
   const stamp = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyyMMdd');
-  const copy = src.makeCopy('【備份】羽球冬令營報名_' + stamp, folder);
+  const copy = src.makeCopy('【備份】台大羽球冬令營報名_' + stamp, folder);
+
+  // ⚠️ 備份副本會繼承來源 Sheet 的共用設定。來源如果曾經開過「知道連結的人可查看」，
+  //    副本就會跟著開，等於把整份報名個資多複製一份到外面看得到的地方。
+  //    這裡每次都明確壓成私有，不倚賴繼承。
+  copy.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+
   const files = folder.getFiles();
   const list = [];
   while (files.hasNext()) list.push(files.next());
@@ -674,6 +708,207 @@ function dailyBackup() {
   list.slice(14).forEach(f => f.setTrashed(true));
   return copy.getId();
 }
+
+// ══════════════════════════════════════════
+// 個資保護：權限稽核與保留期限
+//
+// 這一區的函式都可以隨時手動執行。
+// checkPrivacy() 唯讀，不動任何東西；
+// lockDownSharing() 會改共用設定；
+// purgeOldData() 會刪資料，預設是試算模式。
+// ══════════════════════════════════════════
+
+/** 把 Drive 的共用設定翻成看得懂的字，並判斷是否安全 */
+function describeSharing_(file) {
+  var access, perm;
+  try {
+    access = String(file.getSharingAccess());
+    perm = String(file.getSharingPermission());
+  } catch (e) {
+    return { safe: false, text: '讀不到共用設定：' + e.message };
+  }
+  // PRIVATE 以外都代表「不用被邀請也可能看得到」，對報名個資來說一律視為不安全
+  var safe = (access === 'PRIVATE');
+  return { safe: safe, access: access, permission: perm, text: access + ' / ' + perm };
+}
+
+/**
+ * 個資保護稽核。唯讀，不寫不刪不寄信，隨時可以跑。
+ *
+ * 檢查三件事：
+ * 1. 報名 Sheet 有沒有被設成「知道連結的人可以看」
+ * 2. 每日備份的副本有沒有跟著外流
+ * 3. 除了你自己以外，還有誰有存取權
+ */
+function checkPrivacy() {
+  const out = ['── 個資保護稽核 ──'];
+
+  // 1. 報名 Sheet
+  try {
+    const sheetFile = DriveApp.getFileById(CONFIG.SHEET_ID);
+    const s = describeSharing_(sheetFile);
+    out.push((s.safe ? '✅' : '🔴') + ' 報名 Sheet 共用狀態：' + s.text);
+    if (!s.safe) {
+      out.push('   ⚠️ 任何拿到連結的人都可能看到全部報名個資。請執行 lockDownSharing() 收緊。');
+    }
+    const editors = sheetFile.getEditors().map(function (u) { return u.getEmail(); });
+    const viewers = sheetFile.getViewers().map(function (u) { return u.getEmail(); });
+    out.push('   個別授權：編輯者 ' + editors.length + ' 人' +
+             (editors.length ? '（' + editors.join('、') + '）' : '') +
+             '、檢視者 ' + viewers.length + ' 人' +
+             (viewers.length ? '（' + viewers.join('、') + '）' : ''));
+    out.push('   ※ 這些是被個別邀請的帳號，確認每一個都是現在還需要看資料的人。');
+  } catch (e) {
+    out.push('🔴 無法讀取報名 Sheet：' + e.message);
+  }
+
+  // 2. 備份資料夾與副本
+  try {
+    const it = DriveApp.getFoldersByName(BACKUP_FOLDER_NAME);
+    if (!it.hasNext()) {
+      out.push('⚠️ 找不到備份資料夾「' + BACKUP_FOLDER_NAME + '」——每日備份可能還沒跑過。');
+    } else {
+      const folder = it.next();
+      const f = describeSharing_(folder);
+      out.push((f.safe ? '✅' : '🔴') + ' 備份資料夾共用狀態：' + f.text);
+      const files = folder.getFiles();
+      let total = 0, bad = 0;
+      const badNames = [];
+      while (files.hasNext()) {
+        const file = files.next();
+        total++;
+        const d = describeSharing_(file);
+        if (!d.safe) { bad++; if (badNames.length < 5) badNames.push(file.getName()); }
+      }
+      out.push((bad === 0 ? '✅' : '🔴') + ' 備份副本 ' + total + ' 份，其中 ' + bad + ' 份是對外可見的' +
+               (badNames.length ? '（例如：' + badNames.join('、') + '）' : ''));
+      if (bad > 0) out.push('   ⚠️ 執行 lockDownSharing() 會把它們全部壓成私有。');
+    }
+  } catch (e) {
+    out.push('🔴 無法檢查備份：' + e.message);
+  }
+
+  // 3. 保留期限
+  try {
+    const sheet = getSheet_();
+    const n = Math.max(0, sheet.getLastRow() - 1);
+    const purgeAt = new Date(CONFIG.DATA_PURGE_AFTER);
+    const days = Math.ceil((purgeAt - new Date()) / 86400000);
+    out.push('ℹ️ 目前保有 ' + n + ' 筆報名個資；依報名表的告知，應於 ' +
+             Utilities.formatDate(purgeAt, 'Asia/Taipei', 'yyyy/MM/dd') + ' 前刪除（' +
+             (days >= 0 ? '還有 ' + days + ' 天' : '已逾期 ' + (-days) + ' 天') + '）。');
+    if (days < 0) out.push('   🔴 已超過告知的保留期限，請執行 purgeOldData(true) 刪除。');
+  } catch (e) {
+    out.push('⚠️ 無法統計筆數：' + e.message);
+  }
+
+  // 4. 提醒無法從程式端檢查的部分
+  out.push('');
+  out.push('以下無法用程式檢查，請自行確認：');
+  out.push('  · Apps Script 部署的「誰可以存取」必須是「所有人」，報名才收得到。');
+  out.push('    這是必要的，但它只開放「送出報名」，本後端沒有任何讀取個資的對外端點。');
+  out.push('  · 招生狀況查詢（action:progress）只回各時段人數，不含任何個資。');
+
+  const msg = out.join('\n');
+  Logger.log(msg);
+  return msg;
+}
+
+/**
+ * 一鍵收緊共用設定：報名 Sheet、備份資料夾、所有備份副本一律改成「只有我」。
+ *
+ * 不會動「個別邀請」的編輯者／檢視者——那是你自己加的人，要移除請到 Sheet 上手動處理，
+ * 程式亂踢人會把協作者一起踢掉。
+ */
+function lockDownSharing() {
+  const done = [];
+  try {
+    DriveApp.getFileById(CONFIG.SHEET_ID)
+            .setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+    done.push('✅ 報名 Sheet 已設為私有');
+  } catch (e) {
+    done.push('🔴 報名 Sheet 設定失敗：' + e.message);
+  }
+  try {
+    const it = DriveApp.getFoldersByName(BACKUP_FOLDER_NAME);
+    if (!it.hasNext()) {
+      done.push('⚠️ 沒有備份資料夾，略過');
+    } else {
+      const folder = it.next();
+      folder.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+      let n = 0;
+      const files = folder.getFiles();
+      while (files.hasNext()) {
+        files.next().setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+        n++;
+      }
+      done.push('✅ 備份資料夾與 ' + n + ' 份副本已設為私有');
+    }
+  } catch (e) {
+    done.push('🔴 備份設定失敗：' + e.message);
+  }
+  const msg = done.join('\n');
+  Logger.log(msg);
+  return msg;
+}
+
+/**
+ * 依報名表的個資告知刪除報名資料（活動結束後六個月內）。
+ *
+ * ⚠️ 這是不可逆操作，所以預設只試算不刪：
+ *      purgeOldData()      → 只告訴你會刪幾筆，不動資料
+ *      purgeOldData(true)  → 真的刪
+ *
+ * 刪除範圍：報名 Sheet 的所有資料列（不含標題）＋ 備份資料夾內所有副本。
+ * 只有在超過 CONFIG.DATA_PURGE_AFTER 之後才會真的執行，避免營期中誤觸。
+ */
+function purgeOldData(reallyDelete) {
+  const purgeAt = new Date(CONFIG.DATA_PURGE_AFTER);
+  const now = new Date();
+  const sheet = getSheet_();
+  const rows = Math.max(0, sheet.getLastRow() - 1);
+
+  let backupCount = 0;
+  const it = DriveApp.getFoldersByName(BACKUP_FOLDER_NAME);
+  const folder = it.hasNext() ? it.next() : null;
+  if (folder) {
+    const files = folder.getFiles();
+    while (files.hasNext()) { files.next(); backupCount++; }
+  }
+
+  const header = '保留期限：' + Utilities.formatDate(purgeAt, 'Asia/Taipei', 'yyyy/MM/dd') +
+                 '\n報名資料 ' + rows + ' 筆、備份副本 ' + backupCount + ' 份';
+
+  if (now < purgeAt) {
+    const msg = header + '\n\n⛔ 尚未到期，不執行刪除。' +
+                '\n（真的要提前刪除，請先改 CONFIG.DATA_PURGE_AFTER）';
+    Logger.log(msg);
+    return msg;
+  }
+  if (!reallyDelete) {
+    const msg = header + '\n\n🔍 試算模式：上述資料「會」被刪除。' +
+                '\n確認無誤後，執行 purgeOldData(true) 才會真的刪。';
+    Logger.log(msg);
+    return msg;
+  }
+
+  if (rows > 0) sheet.deleteRows(2, rows);
+  if (folder) {
+    const files = folder.getFiles();
+    while (files.hasNext()) files.next().setTrashed(true);
+  }
+  const msg = header + '\n\n🗑 已刪除：報名資料 ' + rows + ' 筆、備份副本 ' + backupCount + ' 份。' +
+              '\n（Drive 的檔案在垃圾桶內仍可救回，確定不需要請一併清空垃圾桶。）';
+  Logger.log(msg);
+  return msg;
+}
+
+// ══════════════════════════════════════════
+// 取消開班通知（未達開班門檻時手動執行）
+//
+// 用法：sendCancelNotice('上午班（09:00–12:00）')
+//       只通知該時段的報名者；不傳參數會擋下來，避免誤發給全部人。
+// ══════════════════════════════════════════
 
 // ══════════════════════════════════════════
 // 取消開班通知（未達開班門檻時手動執行）

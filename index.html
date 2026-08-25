@@ -3,6 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 內容安全政策：限制這個頁面能載入 / 連線到哪些來源。
+     萬一頁面上被塞進第三方腳本，它也連不出去，報名個資帶不走。
+     ⚠️ 改動外部資源（換字型、換圖床、換 GAS 網址）時要同步更新這裡，
+        否則資源會被瀏覽器擋掉。frame-ancestors 只能靠 HTTP 標頭，
+        GitHub Pages 設不了，故未列入。 -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' https://www.googletagmanager.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' https://fonts.gstatic.com;
+  img-src 'self' data: https://res.cloudinary.com https://www.googletagmanager.com https://*.google-analytics.com;
+  connect-src 'self' https://script.google.com https://script.googleusercontent.com https://*.googleusercontent.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com;
+  form-action 'none';
+  base-uri 'self';
+  object-src 'none';
+">
 <!-- Google tag (gtag.js) -->
 <!-- 內部流量開關：在任一頁網址後加 ?ga_off=1 造訪一次，這台瀏覽器在「四個子網域」都不再送出 GA 資料。要恢復：改加 ?ga_on=1
      旗標存成根網域 cookie（localStorage 不跨子網域，只作為輔助） -->
@@ -530,7 +546,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
 
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" type="button" aria-label="關閉">&times;</button>
-  <img id="lightboxImg" src="" alt="">
+  <img id="lightboxImg" alt="">
   <div class="lightbox-cap" id="lightboxCap"></div>
 </div>
 <footer>
