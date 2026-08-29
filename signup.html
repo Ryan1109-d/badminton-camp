@@ -545,6 +545,9 @@ const isEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   msgBox.className = 'msg';
+  // 每次送出先清掉上一輪的紅框。只清必填清單裡的欄位不夠——像健康狀況說明、
+  // 飲食禁忌說明這類條件式欄位不在清單內，補填之後紅框會一直留著。
+  document.querySelectorAll('#signupForm .err').forEach(el => el.classList.remove('err'));
   let valid = true;
   const requiredText = ['studentName','age','email','emgName','emgPhone','payerName','payerPhone','payerEmail'];
   const requiredSelect = ['session','gender','shirtSize'];
