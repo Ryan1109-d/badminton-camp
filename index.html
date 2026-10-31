@@ -619,12 +619,18 @@ document.querySelectorAll('.faq-q').forEach((btn, i) => {
 })();
 
 // ── 報名總開關（與 signup.html 的 REGISTRATION_OPEN 要一致）──
-// false 時把所有「立即報名」改成「報名暫停」，避免家長點進去才發現關了。
+// false 時把所有報名按鈕改成「報名暫停」並拿掉 href，點了不會進到報名頁。
+// 按鈕本身的文字就是說明，所以不需要再跳頁解釋。
 (function(){
   var REGISTRATION_OPEN = false;
   if (REGISTRATION_OPEN) return;
   document.querySelectorAll('a[href="signup.html"]').forEach(function(a){
-    a.textContent = a.textContent.indexOf('\u2192') >= 0 ? '\u5831\u540d\u66ab\u505c \u2192' : '\u5831\u540d\u66ab\u505c';
+    a.textContent = '\u5831\u540d\u66ab\u505c';
+    a.removeAttribute('href');          // 不再是連結，點了沒有動作
+    a.setAttribute('aria-disabled', 'true');
+    a.style.opacity = '0.55';
+    a.style.cursor = 'default';
+    a.style.pointerEvents = 'none';
   });
 })();
 </script>
