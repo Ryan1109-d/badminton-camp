@@ -617,6 +617,16 @@ document.querySelectorAll('.faq-q').forEach((btn, i) => {
     if (b) b.parentNode.removeChild(b);
   }
 })();
+
+// ── 報名總開關（與 signup.html 的 REGISTRATION_OPEN 要一致）──
+// false 時把所有「立即報名」改成「報名暫停」，避免家長點進去才發現關了。
+(function(){
+  var REGISTRATION_OPEN = false;
+  if (REGISTRATION_OPEN) return;
+  document.querySelectorAll('a[href="signup.html"]').forEach(function(a){
+    a.textContent = a.textContent.indexOf('\u2192') >= 0 ? '\u5831\u540d\u66ab\u505c \u2192' : '\u5831\u540d\u66ab\u505c';
+  });
+})();
 </script>
 </body>
 </html>
