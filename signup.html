@@ -565,6 +565,7 @@ const isEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   msgBox.className = 'msg';
+  msgBox.textContent = '';   // 連同上一輪的錯誤字一起清掉，否則送出成功後紅字還留著
   // 每次送出先清掉上一輪的紅框。只清必填清單裡的欄位不夠——像健康狀況說明、
   // 飲食禁忌說明這類條件式欄位不在清單內，補填之後紅框會一直留著。
   document.querySelectorAll('#signupForm .err').forEach(el => el.classList.remove('err'));
