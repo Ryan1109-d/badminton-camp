@@ -622,7 +622,7 @@ document.querySelectorAll('.faq-q').forEach((btn, i) => {
 // false 時把所有報名按鈕改成「報名暫停」並拿掉 href，點了不會進到報名頁。
 // 按鈕本身的文字就是說明，所以不需要再跳頁解釋。
 (function(){
-  var REGISTRATION_OPEN = true;
+  var REGISTRATION_OPEN = false;
   if (REGISTRATION_OPEN) return;
   document.querySelectorAll('a[href="signup.html"]').forEach(function(a){
     a.textContent = '\u5831\u540d\u66ab\u505c';

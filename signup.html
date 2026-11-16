@@ -452,7 +452,7 @@ const form = document.getElementById('signupForm');
 // 要重新開放只要改回 true 並推上去，不需要動 Apps Script。
 // ⚠️ 這只擋住網頁入口；後端仍然收得到直接 POST 的請求。
 //    要連後端一起擋，另需把 Apps Script 的報名截止時間改到過去並重新部署。
-const REGISTRATION_OPEN = true;
+const REGISTRATION_OPEN = false;
 if (!REGISTRATION_OPEN) {
   form.style.display = 'none';
   const n = document.createElement('div');
