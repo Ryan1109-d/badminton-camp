@@ -3,8 +3,12 @@
  * （與足球營完全分開：請用新的 Google Sheet + 新的 Apps Script 部署）
  *
  * 部署步驟：
- * 1. Google Sheet 第一列欄位標題（共 27 欄，與下方 appendRow 順序一致）：
- *    報名時間 | 梯次 | 時段 | 學員姓名 | 性別 | 年齡 | 年級 | 收信信箱 | 緊急聯絡人 | 緊急聯絡人電話 | 繳款人姓名 | 繳款人電話 | 繳款人信箱 | 優惠身份 | 推薦人 | 午餐 | 狀態 | 團報成員 | 衣服尺寸 | 備註 | 照片同意 | 健康狀況 | 健康說明 | 緊急醫療授權 | 法定代理人聲明 | 繳費通知 | 系統訊息
+ * 1. Google Sheet 第一列欄位標題（共 29 欄，與下方 appendRow 順序一致）：
+ *    報名時間 | 梯次 | 時段 | 學員姓名 | 性別 | 年齡 | 年級 | 收信信箱 | 緊急聯絡人 | 緊急聯絡人電話 | 繳款人姓名 | 繳款人電話 | 繳款人信箱 | 優惠身份 | 推薦人 | 午餐 | 飲食禁忌 | 狀態 | 團報成員 | 衣服尺寸 | 備註 | 照片同意 | 健康狀況 | 健康說明 | 緊急醫療授權 | 法定代理人聲明 | 繳費通知 | 行前通知 | 系統訊息
+ *
+ *    ⚠️ 2026-11-16 新增兩欄，若 Sheet 已有報名資料，請用「插入 1 欄」而不是改標題：
+ *       ・第 17 欄「飲食禁忌」插在「午餐」與「狀態」之間
+ *       ・第 28 欄「行前通知」插在「繳費通知」與「系統訊息」之間
  *
  *    ⚠️ 2026-08-17 新增第 15 欄「推薦人」。若 Sheet 已有報名資料，
  *       請用「插入 1 欄」而不是直接改標題，否則第 15 欄之後的既有資料會全部錯位。
@@ -64,11 +68,12 @@ const COL = {
   TIME: 0, SESSION: 1, SLOT: 2, STUDENT: 3, GENDER: 4, AGE: 5, GRADE: 6,
   EMAIL: 7, EMG_NAME: 8, EMG_PHONE: 9,
   PAYER_NAME: 10, PAYER_PHONE: 11, PAYER_EMAIL: 12,
-  DISCOUNT: 13, REFERRER: 14, LUNCH: 15, STATUS: 16, GROUP: 17, SHIRT: 18,
-  NOTES: 19, PHOTO: 20,
-  HEALTH: 21, HEALTH_DETAIL: 22, MEDICAL: 23, GUARDIAN: 24
+  DISCOUNT: 13, REFERRER: 14, LUNCH: 15, DIET: 16, STATUS: 17, GROUP: 18, SHIRT: 19,
+  NOTES: 20, PHOTO: 21,
+  HEALTH: 22, HEALTH_DETAIL: 23, MEDICAL: 24, GUARDIAN: 25
 };
-const NOTICE_COL = 26;   // 繳費通知（1-based）
+const NOTICE_COL  = 27;   // 繳費通知（1-based）
+const PRECAMP_COL = 28;   // 行前通知（1-based）
 
 // ══════════════════════════════════════════
 // 場地確認防呆（2026-11-16 新增）
@@ -82,13 +87,13 @@ const NOTICE_COL = 26;   // 繳費通知（1-based）
 // ══════════════════════════════════════════
 const VENUE_CONFIRMED  = false;                              // ← 場地確認後改 true
 const VENUE_DEADLINE   = new Date('2026-12-25T23:59:59+08:00');  // 校方正式確認日
-const SYSMSG_COL = 27;   // 系統訊息（1-based）
+const SYSMSG_COL  = 29;   // 系統訊息（1-based）
 
 // 標題列應有的 27 欄，順序即寫入順序。checkSetup() 會拿它逐欄比對。
 const EXPECTED_HEADERS = [
   '報名時間','梯次','時段','學員姓名','性別','年齡','年級','收信信箱','緊急聯絡人','緊急聯絡人電話',
-  '繳款人姓名','繳款人電話','繳款人信箱','優惠身份','推薦人','午餐','狀態','團報成員','衣服尺寸',
-  '備註','照片同意','健康狀況','健康說明','緊急醫療授權','法定代理人聲明','繳費通知','系統訊息'
+  '繳款人姓名','繳款人電話','繳款人信箱','優惠身份','推薦人','午餐','飲食禁忌','狀態','團報成員','衣服尺寸',
+  '備註','照片同意','健康狀況','健康說明','緊急醫療授權','法定代理人聲明','繳費通知','行前通知','系統訊息'
 ];
 
 // ⚠️ 以下字串必須與 signup.html 的 <input name="slot"> option value 逐字一致，
@@ -247,6 +252,8 @@ function notifyOwner_(data, clean, status, seq, counts) {
     '優惠身份：' + dash(clean.discount) + '\n' +
     '推薦人：' + safeText(ref, 20) + (ref !== '—' ? '　← 需人工核對是否也已報名' : '') + '\n' +
     '午餐：' + dash(clean.lunch) + '\n' +
+    '飲食禁忌：' + dash(clean.diet) +
+      (String(clean.diet).indexOf('有') === 0 ? '　⚠️ 代訂午餐要避開' : '') + '\n' +
     '團報成員：' + dash(clean.groupMembers) + '\n' +
     '備註：' + dash(clean.notes) + '\n' +
     '─────────────────\n' +
@@ -370,6 +377,8 @@ function doPost(e) {
       // 推薦人為選填。空值一律寫「—」，calcAmount 以此判定不適用推薦優惠。
       referrer:     safeCell(data.referrer, 20) || '—',
       lunch:        safeCell(data.lunch, 30),
+      // 飲食禁忌：前端必填（無／有：說明）。後端不設必填，避免舊版前端送出時整筆被退。
+      diet:         safeCell(data.diet, 200) || '—',
       groupMembers: safeCell(data.groupMembers, 200) || '—',
       shirtSize:    safeCell(data.shirtSize, 20),
       notes:        safeCell(data.notes, 200) || '—',
@@ -410,11 +419,11 @@ function doPost(e) {
       clean.session, clean.slot, clean.studentName, clean.gender, clean.age, clean.grade,
       clean.email, clean.emgName, clean.emgPhone,
       clean.payerName, clean.payerPhone, clean.payerEmail,
-      clean.discount, clean.referrer, clean.lunch,
+      clean.discount, clean.referrer, clean.lunch, clean.diet,
       status,
       clean.groupMembers, clean.shirtSize, clean.notes, clean.photoConsent,
       clean.health, clean.healthDetail, clean.medical, clean.guardian,
-      '', ''   // 繳費通知、系統訊息
+      '', '', ''   // 繳費通知、行前通知、系統訊息
     ]);
     const tWrite = Date.now();
     // ---- 寫入成功，此時才記錄冷卻與流量計數 ----
@@ -464,6 +473,7 @@ function sendConfirmEmail(data) {
 緊急聯絡人：${safeText(data.emgName,20)}（${safeText(data.emgPhone,15)}）
 優惠身份：${safeText(data.discount,20)}
 午餐：${safeText(data.lunch,30)}
+飲食禁忌：${safeText(data.diet,200) || '—'}
 衣服尺寸：${safeText(data.shirtSize,20)}${String(data.healthStatus).trim() === '有特殊狀況' ? '\n健康狀況：' + safeText(data.healthDetail,200) : ''}${data.notes && data.notes !== '—' ? '\n備註：' + safeText(data.notes,200) : ''}
 ── 接下來的流程 ──
 1. 您目前的報名為「預登記」，尚未收取任何費用
@@ -672,6 +682,287 @@ function sendPaymentNotice() {
     sent++;
   }
   return '已寄送 ' + sent + ' 封，略過 ' + skipped + ' 筆。';
+}
+
+// ══════════════════════════════════════════
+// 繳費確認信（收到轉帳後手動執行）
+//
+// 繳費通知裡向家長承諾「我們核帳後會回覆確認」。這支就是那封確認。
+// 用法：sendPaymentConfirm('張小明')
+// 先自行核對銀行入帳，再執行；本函式不碰金額、不判定是否真的收到錢。
+// 重跑保護：寄過會在「系統訊息」留註記，再跑會直接擋下。
+// ══════════════════════════════════════════
+function sendPaymentConfirm(studentName) {
+  if (!studentName) throw new Error('請傳入學員姓名，例如 sendPaymentConfirm("張小明")');
+  const sheet = getSheet_();
+  const rows  = sheet.getDataRange().getValues();
+  const MARK  = '繳費確認信已寄';
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (String(r[COL.STUDENT]).trim() !== String(studentName).trim()) continue;
+    const sysmsg = String(r[SYSMSG_COL - 1] || '');
+    if (sysmsg.indexOf(MARK) >= 0) {
+      return '⏸ ' + studentName + ' 的繳費確認信先前已寄過（系統訊息有註記），這次不重寄。';
+    }
+    const to = String(r[COL.PAYER_EMAIL] || '').trim() || String(r[COL.EMAIL] || '').trim();
+    if (!to) return '❌ 找到 ' + studentName + '，但沒有可寄送的信箱。';
+    const amt = calcAmount(r);
+    const body =
+safeText(r[COL.PAYER_NAME], 20) + ' 您好：\n' +
+'\n' +
+'已收到 ' + safeText(r[COL.STUDENT], 20) + ' 的營隊費用，報名程序完成，正式錄取。\n' +
+'\n' +
+'── 報名資訊 ──\n' +
+'營隊：' + CONFIG.CAMP_NAME + '\n' +
+'日期：' + CONFIG.CAMP_DATE + '\n' +
+'時段：' + safeText(r[COL.SLOT], 40) + '\n' +
+'實收金額：NT$ ' + amt.total + '\n' +
+(amt.hasReferrer
+  ? '\n※ 您填寫的推薦人優惠 NT$ ' + amt.refundable + ' 未含在上方金額內，\n' +
+    '　 將於開課第一天在報到處以現金退還，不需另外申請。\n'
+  : '') +
+'\n' +
+'── 接下來 ──\n' +
+'開課前我們會再寄一封行前通知信，說明當天時間、地點與需要準備的東西。\n' +
+'在那之前不需要做任何事。\n' +
+'\n' +
+'若需要收據或有任何問題，請直接回覆本信。' + lineSection() + '\n' +
+'Stay Young 台灣大學羽球冬令營\n' +
+CONFIG.REPLY_EMAIL;
+    MailApp.sendEmail({
+      to: to,
+      subject: '【' + CONFIG.CAMP_NAME + '】繳費確認｜' + safeText(r[COL.STUDENT], 20) + ' 已完成報名',
+      body: body,
+      replyTo: CONFIG.REPLY_EMAIL,
+      name: 'Stay Young 台灣大學羽球冬令營'
+    });
+    sheet.getRange(i + 1, SYSMSG_COL).setValue(
+      (sysmsg ? sysmsg + '；' : '') + MARK + ' ' +
+      Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy/MM/dd HH:mm'));
+    return '✅ 繳費確認信已寄給 ' + to + '（' + studentName + '，NT$ ' + amt.total + '）';
+  }
+  return '❌ 找不到學員「' + studentName + '」。請確認姓名與 Sheet 上完全一致。';
+}
+
+// ══════════════════════════════════════════
+// 候補遞補通知（有人取消、釋出名額時手動執行）
+//
+// 候補信向家長承諾「若有名額釋出，我們將立即以 email 通知您」。這支就是那封。
+// 用法：① 先把該列「狀態」從「候補」改成「正取」 ② sendPromotionNotice('張小明')
+// 刻意要求先改狀態再寄：寄信與名額是兩件事，先改狀態才不會寄完發現名額又被搶走。
+// 重跑保護：寄過會在「系統訊息」留註記。
+// ══════════════════════════════════════════
+function sendPromotionNotice(studentName) {
+  if (!studentName) throw new Error('請傳入學員姓名，例如 sendPromotionNotice("張小明")');
+  const sheet = getSheet_();
+  const rows  = sheet.getDataRange().getValues();
+  const MARK  = '遞補通知已寄';
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (String(r[COL.STUDENT]).trim() !== String(studentName).trim()) continue;
+    const status = String(r[COL.STATUS]).trim();
+    if (status !== '正取') {
+      return '⏸ ' + studentName + ' 目前狀態是「' + (status || '(空白)') + '」。\n' +
+             '請先把「狀態」欄改成「正取」再執行，這樣才不會通知完名額又被佔走。';
+    }
+    const sysmsg = String(r[SYSMSG_COL - 1] || '');
+    if (sysmsg.indexOf(MARK) >= 0) {
+      return '⏸ ' + studentName + ' 的遞補通知先前已寄過，這次不重寄。';
+    }
+    const to = String(r[COL.EMAIL] || '').trim();
+    if (!to) return '❌ 找到 ' + studentName + '，但「收信信箱」是空的。';
+    const venuePending = !VENUE_CONFIRMED;
+    const body =
+'您好：\n' +
+'\n' +
+safeText(r[COL.STUDENT], 20) + ' 的候補已遞補成功，正式取得 ' +
+  safeText(r[COL.SLOT], 40) + ' 的名額。\n' +
+'\n' +
+'── 報名資訊 ──\n' +
+'營隊：' + CONFIG.CAMP_NAME + '\n' +
+'日期：' + CONFIG.CAMP_DATE + '\n' +
+'時段：' + safeText(r[COL.SLOT], 40) + '\n' +
+'狀態：正取（由候補遞補）\n' +
+'\n' +
+'── 接下來的流程 ──\n' +
+(venuePending
+  ? '1. 本營隊已向國立台灣大學預定該週場地；依校方場地借用作業規定，\n' +
+    '　 正式使用確認須於 12/25 回覆。在此之前不會收取任何費用\n' +
+    '2. 場地正式確認且達開班標準後，我們才會寄送「繳費通知」至繳款人信箱\n' +
+    '3. 依通知的帳號完成轉帳繳費後即確認錄取\n' +
+    '4. 開課前會再寄送行前通知信\n'
+  : '1. 我們會寄送「繳費通知」至繳款人信箱\n' +
+    '2. 依通知的帳號完成轉帳繳費後即確認錄取\n' +
+    '3. 開課前會再寄送行前通知信\n') +
+'\n' +
+'您報名時填寫的資料我們都留著，不需要重新填表。\n' +
+'若這段時間已經另有安排、不再需要這個名額，請回覆本信告知，\n' +
+'我們會把名額讓給下一位候補的孩子。' + lineSection() + '\n' +
+'Stay Young 台灣大學羽球冬令營\n' +
+CONFIG.REPLY_EMAIL;
+    MailApp.sendEmail({
+      to: to,
+      subject: '【' + CONFIG.CAMP_NAME + '】候補遞補成功通知',
+      body: body,
+      replyTo: CONFIG.REPLY_EMAIL,
+      name: 'Stay Young 台灣大學羽球冬令營'
+    });
+    sheet.getRange(i + 1, SYSMSG_COL).setValue(
+      (sysmsg ? sysmsg + '；' : '') + MARK + ' ' +
+      Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy/MM/dd HH:mm'));
+    return '✅ 遞補通知已寄給 ' + to + '（' + studentName + '）';
+  }
+  return '❌ 找不到學員「' + studentName + '」。請確認姓名與 Sheet 上完全一致。';
+}
+
+// ══════════════════════════════════════════
+// 行前通知信（開課前 3 天手動執行，不設自動觸發）
+//
+// ⚠️ PRECAMP_ENTRY_NOTE 是「進場動線提醒」。留空字串整段會自動省略，
+//    不會寄出「待填」字樣。拿到實際動線後填進去就好。
+// ══════════════════════════════════════════
+const PRECAMP_ENTRY_NOTE = '';
+
+/** 時段 → 當日時間文字 */
+function slotScheduleText_(s) {
+  if (s === SLOT_AM)   return '早上班 09:00–12:00';
+  if (s === SLOT_PM)   return '下午班 14:00–17:00';
+  if (s === SLOT_FULL) return '整天班 09:00–17:00（含午休）';
+  return String(s || '');
+}
+
+/** 行前信的 LINE 段落（未填真值整段省略，與 lineSection() 同策略） */
+function preCampLineSection_() {
+  const url = String(CONFIG.LINE_GROUP_URL || '').trim();
+  if (!url || url.indexOf('http') !== 0) return '';
+  return '\n■ 家長 LINE 社群\n' +
+         '每天課後會分享訓練重點與照片，還沒加入請點：\n' + url + '\n';
+}
+
+/**
+ * 組行前通知信內容。純粹吃一列資料，不碰 Sheet、不寄信，方便單獨驗證。
+ * 回傳 { subject, body }
+ */
+function buildPreCampMail(row) {
+  const student = safeText(row[COL.STUDENT], 20);
+  const payer   = safeText(row[COL.PAYER_NAME], 20) || '家長';
+  const slot    = String(row[COL.SLOT] || '').trim();
+  const fullDay = slot === SLOT_FULL;
+  const lunch   = String(row[COL.LUNCH] || '');
+  const diet    = String(row[COL.DIET] || '').trim();
+  // 本營隊午餐費已併入轉帳金額 → 第一天不用帶現金（與清大兩站相反）
+  const hasMeal = fullDay && lunch.indexOf('代訂') >= 0;
+  const ref     = String(row[COL.REFERRER] || '').trim();
+  const hasRef  = ref !== '' && ref !== '—';
+  const entryNote = String(PRECAMP_ENTRY_NOTE || '').trim();
+
+  const body =
+payer + ' 您好：\n' +
+'\n' +
+student + ' 報名的台灣大學羽球冬令營（' + slotScheduleText_(slot) + '）即將開始，\n' +
+'以下是開課前需要知道的事。\n' +
+'\n' +
+'■ 日期與時間\n' +
+CONFIG.CAMP_DATE + '，共四天\n' +
+'您的時段：' + slotScheduleText_(slot) + '\n' +
+'每日 08:30 開放報到。\n' +
+'最早 08:00 可送達、最晚 18:00 前接回，延長時段由教練在場照管，不另收費。\n' +
+'\n' +
+'■ 上課地點\n' +
+'國立台灣大學 綜合體育館（台北市大安區羅斯福路四段 1 號）\n' +
+(entryNote ? entryNote + '\n' : '') +
+'全程室內，不受天候影響。\n' +
+'\n' +
+'■ 請準備\n' +
+'・好活動的運動服\n' +
+'・室內運動鞋（請勿穿外出鞋進場）\n' +
+'・水壺\n' +
+'・球拍可自備；沒有的話現場有球拍可借，羽球由營隊提供\n' +
+'\n' +
+'■ 第一天請記得\n' +
+(hasMeal
+  ? '・您已代訂午餐，費用已併入先前的轉帳金額，第一天不需準備現金\n'
+  : (fullDay ? '・整天班請自行準備午餐，或安排外出用餐\n' : '')) +
+(hasRef
+  ? '・推薦人優惠將於報到處以現金退還，不需另外申請\n'
+  : '') +
+'・營隊紀念衫於第一天發放\n' +
+'・第一天由教練現場看程度分組，第一次拿拍也沒問題\n' +
+(diet && diet !== '—' && diet !== '無'
+  ? '・您填寫的飲食禁忌（' + safeText(diet, 200) + '）已交給現場人員，如有變動請報到時告知\n'
+  : '') +
+'・身體狀況如有變動，請報到時告知教練\n' +
+preCampLineSection_() +
+'\n' +
+'■ 停課與請假\n' +
+'颱風、天災依台北市政府停班停課公告辦理。\n' +
+'臨時請假請回信告知。\n' +
+'\n' +
+'如有任何問題，請回信至 ' + CONFIG.REPLY_EMAIL + '。\n' +
+'球場見！\n' +
+'\n' +
+'Stay Young 台灣大學羽球冬令營';
+
+  return { subject: '【台大羽球冬令營】行前通知｜1/25（一）開課，請先看這封', body: body };
+}
+
+/** 預覽：拿第一位「正取」的資料組信，只寄給自己。不寫 Sheet。永遠安全。 */
+function previewPreCampNotice() {
+  const rows = getSheet_().getDataRange().getValues();
+  let sample = null;
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][COL.STATUS]).trim() === '正取') { sample = rows[i]; break; }
+  }
+  if (!sample) throw new Error('目前沒有狀態為「正取」的報名，無法產生預覽。');
+  const mail = buildPreCampMail(sample);
+  const to = Session.getEffectiveUser().getEmail();
+  MailApp.sendEmail({
+    to: to,
+    subject: '【預覽】' + mail.subject,
+    body: '這是預覽，只寄給你自己，Sheet 沒有被寫入任何資料。\n' +
+          '取樣對象：' + safeText(sample[COL.STUDENT], 20) +
+          '（' + safeText(sample[COL.SLOT], 40) + '）\n' +
+          '───────────\n\n' + mail.body,
+    replyTo: CONFIG.REPLY_EMAIL,
+    name: 'Stay Young 台灣大學羽球冬令營'
+  });
+  return '預覽信已寄至 ' + to;
+}
+
+/** 正式寄送：挑「正取」且尚未寄過行前通知的人，寄到收信信箱並回填時間戳。重跑不重寄。 */
+function sendPreCampNotice() {
+  const sheet = getSheet_();
+  const rows = sheet.getDataRange().getValues();
+  let sent = 0, skipped = 0, failed = 0;
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (String(r[COL.STATUS]).trim() !== '正取') { skipped++; continue; }
+    if (String(r[PRECAMP_COL - 1] || '').trim() !== '') { skipped++; continue; }
+    const to = String(r[COL.EMAIL] || '').trim();
+    if (!to) { skipped++; continue; }
+    const mail = buildPreCampMail(r);
+    try {
+      MailApp.sendEmail({
+        to: to,
+        subject: mail.subject,
+        body: mail.body,
+        replyTo: CONFIG.REPLY_EMAIL,
+        name: 'Stay Young 台灣大學羽球冬令營'
+      });
+    } catch (err) {
+      // 寄失敗就不回填，下次重跑會再試一次
+      Logger.log('行前通知寄送失敗（第 ' + (i + 1) + ' 列）：' + err);
+      failed++;
+      continue;
+    }
+    sheet.getRange(i + 1, PRECAMP_COL)
+         .setValue(Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy/MM/dd HH:mm'));
+    sent++;
+  }
+  const msg = '行前通知：已寄 ' + sent + ' 封，略過 ' + skipped + ' 筆' +
+              (failed ? '，失敗 ' + failed + ' 筆（詳見執行記錄，未回填，重跑會再試）' : '') + '。';
+  Logger.log(msg);
+  return msg;
 }
 
 // ══════════════════════════════════════════

@@ -391,6 +391,18 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
         <input type="text" id="healthDetail" name="healthDetail" placeholder="例如：花生過敏、氣喘、蠶豆症、需定時服藥、注意力不足等">
       </div>
       <div class="fg full">
+        <label>飲食禁忌或過敏 <span class="req">*</span>　<span style="color:var(--text-faint);font-weight:400">不論是否代訂午餐都請填寫，供教練掌握學員狀況</span></label>
+        <div class="pc-row">
+          <label class="pc-opt"><input type="radio" name="dietRestrict" value="無">無</label>
+          <label class="pc-opt"><input type="radio" name="dietRestrict" value="有">有，請說明</label>
+        </div>
+      </div>
+      <div class="fg full" id="dietDetailWrap" style="display:none">
+        <label for="dietDetail">飲食禁忌說明 <span class="req">*</span></label>
+        <input type="text" id="dietDetail" name="dietDetail" placeholder="例如：花生過敏、海鮮過敏、不吃牛、奶蛋素">
+        <span style="font-size:11px;color:var(--text-muted);margin-top:3px">若有代訂午餐，我們會為孩子避開，<b>不另外收費</b>。</span>
+      </div>
+      <div class="fg full">
         <label for="notes">其他想告訴我們的</label>
         <input type="text" id="notes" name="notes" placeholder="其他希望教練留意的事項（選填）">
       </div>
@@ -557,6 +569,14 @@ document.querySelectorAll('input[name="healthStatus"]').forEach(r => {
       document.querySelector('input[name="healthStatus"]:checked').value === '有特殊狀況' ? 'flex' : 'none';
   });
 });
+// 飲食禁忌說明展開聯動
+document.querySelectorAll('input[name="dietRestrict"]').forEach(r => {
+  r.addEventListener('change', () => {
+    const picked = document.querySelector('input[name="dietRestrict"]:checked');
+    document.getElementById('dietDetailWrap').style.display =
+      (picked && picked.value === '有') ? 'flex' : 'none';
+  });
+});
 // 團報名單顯示聯動
 document.getElementById('discount').addEventListener('change', (e) => {
   document.getElementById('groupBox').style.display = e.target.value === '團報' ? 'block' : 'none';
@@ -596,6 +616,19 @@ form.addEventListener('submit', async (e) => {
   if (hs.value === '有特殊狀況' && !document.getElementById('healthDetail').value.trim()) {
     document.getElementById('healthDetail').classList.add('err');
     msgBox.textContent = '請填寫健康狀況說明。';
+    msgBox.classList.add('fail');
+    return;
+  }
+  // 飲食禁忌必選（不論是否代訂午餐都要答；代訂午餐要據此避開過敏原）
+  const diet = document.querySelector('input[name="dietRestrict"]:checked');
+  if (!diet) {
+    msgBox.textContent = '請填寫飲食禁忌或過敏（沒有請選「無」）。';
+    msgBox.classList.add('fail');
+    return;
+  }
+  if (diet.value === '有' && !document.getElementById('dietDetail').value.trim()) {
+    document.getElementById('dietDetail').classList.add('err');
+    msgBox.textContent = '請說明飲食禁忌或過敏內容。';
     msgBox.classList.add('fail');
     return;
   }
@@ -665,6 +698,13 @@ form.addEventListener('submit', async (e) => {
       if (l !== '代訂午餐') return l;
       const m = document.querySelector('input[name="mealType"]:checked');
       return `代訂午餐（${m ? m.value : ''}）`;
+    })(),
+    diet: (() => {
+      const d = document.querySelector('input[name="dietRestrict"]:checked');
+      if (!d) return '—';
+      return d.value === '有'
+        ? '有：' + document.getElementById('dietDetail').value.trim()
+        : '無';
     })(),
     notes: document.getElementById('notes').value.trim() || '—',
     photoConsent: document.querySelector('input[name="photoConsent"]:checked').value,
@@ -765,6 +805,7 @@ function showPreview(d) {
       row('梯次', esc(d.session)) + row('時段', esc(d.slot)) + row('優惠身份', esc(d.discount)) +
       row('推薦人', d.referrer ? esc(d.referrer) : '未填') +
       row('午餐', esc(d.lunch)) +
+      row('飲食禁忌', esc(d.diet)) +
       (d.groupMembers && d.groupMembers !== '—' ? row('團報成員', esc(d.groupMembers)) : '') +
       row('健康狀況', esc(d.healthStatus) + (d.healthDetail && d.healthDetail !== '—' ? '：' + esc(d.healthDetail) : '')) +
       row('照片使用', esc(d.photoConsent)) +
