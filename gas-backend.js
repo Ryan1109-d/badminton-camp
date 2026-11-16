@@ -69,6 +69,18 @@ const COL = {
   HEALTH: 21, HEALTH_DETAIL: 22, MEDICAL: 23, GUARDIAN: 24
 };
 const NOTICE_COL = 26;   // 繳費通知（1-based）
+
+// ══════════════════════════════════════════
+// 場地確認防呆（2026-11-16 新增）
+//
+// 台大最早 2026/12/20 才能告知該週空場是否可用。報名頁與確認信都已向家長承諾
+// 「場地確認前為預登記、不收取任何費用」，所以繳費通知不能在那之前寄出去。
+// 這道關卡擋的是「手滑提早執行 sendPaymentNotice()」。
+// 場地確認後：把 VENUE_CONFIRMED 改成 true，重新部署，即可正常寄送。
+// 若 2026/12/25 前仍無法確認場地 → 本營隊取消辦理（繳費尚未發生，不涉退費）。
+// ══════════════════════════════════════════
+const VENUE_CONFIRMED  = false;                              // ← 場地確認後改 true
+const VENUE_DEADLINE   = new Date('2026-12-25T23:59:59+08:00');
 const SYSMSG_COL = 27;   // 系統訊息（1-based）
 
 // 標題列應有的 27 欄，順序即寫入順序。checkSetup() 會拿它逐欄比對。
@@ -177,6 +189,8 @@ function checkSetup() {
   }
   out.push(paymentIsPlaceholder() ? '⚠️ 收款資訊仍是測試值，繳費通知會被擋下'
                                   : '✅ 收款資訊已設定，繳費通知可正常寄出');
+  out.push(VENUE_CONFIRMED ? '✅ 場地已確認（VENUE_CONFIRMED=true），繳費通知可寄送'
+                           : '⏸ 場地尚未確認（VENUE_CONFIRMED=false），繳費通知會被擋下 — 這是刻意的');
   const msg = out.join('\n');
   Logger.log(msg);
   return msg;
@@ -451,10 +465,17 @@ function sendConfirmEmail(data) {
 午餐：${safeText(data.lunch,30)}
 衣服尺寸：${safeText(data.shirtSize,20)}${String(data.healthStatus).trim() === '有特殊狀況' ? '\n健康狀況：' + safeText(data.healthDetail,200) : ''}${data.notes && data.notes !== '—' ? '\n備註：' + safeText(data.notes,200) : ''}
 ── 接下來的流程 ──
-1. 報名人數達開班標準並確認開班後，我們會寄送「繳費通知」至繳款人信箱
-2. 依通知的帳號完成轉帳繳費後即確認錄取
-3. 開課前會再寄送行前通知信
-開班確認前不會收取任何費用，請安心等候通知。
+1. 您目前的報名為「預登記」，尚未收取任何費用
+2. 本營隊場地將於 12/20 前向台灣大學確認
+3. 場地確認且達開班標準後，我們才會寄送「繳費通知」至繳款人信箱
+4. 依通知的帳號完成轉帳繳費後即確認錄取
+5. 開課前會再寄送行前通知信
+
+※ 若 12/25 前仍無法確認場地，本營隊將取消辦理；
+　 由於繳費於場地確認後才進行，不涉及任何退費。
+　 場地進度詳情將於官網與 IG 公告，敬請留意。
+
+場地確認與開班確認前不會收取任何費用，請安心等候通知。
 若有任何問題，歡迎直接回覆本信。${lineSection()}
 Stay Young 台灣大學羽球冬令營
 ${CONFIG.REPLY_EMAIL}`;
@@ -612,6 +633,13 @@ function previewPaymentNotice() {
 
 /** 正式寄送：挑出「正取」且尚未寄過繳費通知的人，寄信並回填時間 */
 function sendPaymentNotice() {
+  if (!VENUE_CONFIRMED) {
+    throw new Error('台大場地尚未確認，已中止寄送繳費通知。\n' +
+      '報名頁與確認信都向家長承諾「場地確認前不收取任何費用」，提早寄出等於失信。\n' +
+      '場地確認後請把 VENUE_CONFIRMED 改成 true 並重新部署（新版本）再執行。\n' +
+      '（若 ' + Utilities.formatDate(VENUE_DEADLINE, 'Asia/Taipei', 'yyyy/MM/dd') +
+      ' 前仍無法確認，本營隊取消辦理，不需寄送也不涉退費。）');
+  }
   if (paymentIsPlaceholder()) {
     throw new Error('收款資訊仍是測試值，已中止。請先把 CONFIG.PAYMENT 換成真實資料，' +
                     '或改用 previewPaymentNotice() 預覽。');

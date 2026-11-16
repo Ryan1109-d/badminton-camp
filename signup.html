@@ -199,6 +199,7 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
     <div class="notice-box" style="margin-bottom:1.8rem">
       <div class="notice-title">📋 報名前請注意</div>
       <div class="notice-text">
+        <b>場地確認時程</b>　本營隊場地將於 <b>12/20 前</b>向台灣大學確認。在此之前您的報名為<b>預登記，不收取任何費用</b>；場地確認後才會寄送繳費通知。若 12/25 前仍無法確認場地，本營隊將取消辦理，不涉及退費。進度將於官網與 IG 公告。<br>
         <b>活動地點</b>　國立台灣大學 綜合體育館（台北市大安區羅斯福路四段 1 號），請提前確認前往方式。<br>
         <b>當天攜帶</b>　運動服、室內運動鞋、水壺。球拍可自備，沒有的話現場也備有；羽球由營隊提供。<br>
         <b>彈性接送</b>　最早 08:00 送達、最晚 18:00 接回，三個時段皆適用，延長時段由教練在場照管，不另收費。<br>
@@ -452,7 +453,7 @@ const form = document.getElementById('signupForm');
 // 要重新開放只要改回 true 並推上去，不需要動 Apps Script。
 // ⚠️ 這只擋住網頁入口；後端仍然收得到直接 POST 的請求。
 //    要連後端一起擋，另需把 Apps Script 的報名截止時間改到過去並重新部署。
-const REGISTRATION_OPEN = false;
+const REGISTRATION_OPEN = true;
 if (!REGISTRATION_OPEN) {
   form.style.display = 'none';
   const n = document.createElement('div');
@@ -785,16 +786,47 @@ function showPreview(d) {
         '<div style="font-size:11.5px;color:var(--text-muted);margin-top:.5rem;line-height:1.65">這是系統依您填寫的內容自動試算的結果，<b>實際金額以繳費通知為準</b>。如有需要確認的地方，我們會主動與您聯繫。確定開班前不會收取任何費用。</div>' +
       '</div>' +
 
+      // 場地確認時程揭露：台大最早 12/20 才能確認空場，確認前一律不收費。
+      // 必勾同意才能送出，未勾時「確認送出」鈕 disabled。
+      '<div style="margin-top:1.1rem;background:rgba(224,123,31,.07);border:.5px solid rgba(224,123,31,.32);border-radius:10px;padding:.9rem 1rem">' +
+        '<div style="font-size:12.5px;font-weight:800;color:var(--accent-deep);margin-bottom:.5rem">報名前重要須知</div>' +
+        '<ol style="margin:0 0 .7rem;padding-left:1.15rem;font-size:12px;color:var(--text-2);line-height:1.85">' +
+          '<li>送出報名（預登記）→ 收到確認信</li>' +
+          '<li>達開班門檻</li>' +
+          '<li><b>場地於 12/20 前確認後，才寄送繳費通知</b></li>' +
+          '<li>完成繳費 → 錄取確認 → 行前通知</li>' +
+        '</ol>' +
+        '<p style="margin:0;font-size:11.5px;color:var(--text-muted);line-height:1.75">' +
+          '本營隊場地將於 <b>12/20 前</b>向台灣大學確認；在此之前您的報名為<b>預登記，不收取任何費用</b>。' +
+          '若 <b>12/25 前仍無法確認場地</b>，本營隊將取消辦理，因繳費於場地確認後才進行，<b>不涉及退費</b>。' +
+          '場地進度詳情將於<b>官網與 IG 公告</b>。</p>' +
+        '<label style="display:flex;gap:.5rem;align-items:flex-start;margin-top:.8rem;padding-top:.8rem;border-top:.5px solid rgba(224,123,31,.25);font-size:12px;color:var(--text-2);line-height:1.6;cursor:pointer">' +
+          '<input type="checkbox" id="agreeVenue" style="margin-top:3px;flex:none">' +
+          '<span>我已詳閱並了解上述報名流程與場地確認時程（12/20 前確認、未確認不收費）。</span>' +
+        '</label>' +
+      '</div>' +
+
       '<div style="display:flex;gap:.7rem;margin-top:1.3rem">' +
         '<button type="button" id="pvBack" style="flex:1;background:transparent;border:.5px solid var(--border);color:var(--text-body);border-radius:8px;padding:.8rem;cursor:pointer;font-family:inherit;font-size:13.5px">返回修改</button>' +
-        '<button type="button" id="pvGo" style="flex:2;background:var(--accent);border:none;color:#fff;border-radius:8px;padding:.8rem;cursor:pointer;font-weight:700;font-family:inherit;font-size:14px">確認送出 →</button>' +
+        '<button type="button" id="pvGo" disabled style="flex:2;background:var(--accent);border:none;color:#fff;border-radius:8px;padding:.8rem;cursor:pointer;font-weight:700;font-family:inherit;font-size:14px;opacity:.45;cursor:not-allowed">確認送出 →</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(m);
   document.body.style.overflow = 'hidden';
   const close = () => { m.remove(); document.body.style.overflow = ''; };
   document.getElementById('pvBack').onclick = close;
+  // 勾選「已詳閱場地確認時程」後才能送出
+  const agreeVenue = document.getElementById('agreeVenue');
+  const pvGo = document.getElementById('pvGo');
+  if (agreeVenue && pvGo) {
+    agreeVenue.addEventListener('change', () => {
+      pvGo.disabled = !agreeVenue.checked;
+      pvGo.style.opacity = agreeVenue.checked ? '1' : '.45';
+      pvGo.style.cursor = agreeVenue.checked ? 'pointer' : 'not-allowed';
+    });
+  }
   document.getElementById('pvGo').onclick = () => {
+    if (pvGo.disabled) return;
     close();
     previewConfirmed = true;
     form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
