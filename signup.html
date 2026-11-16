@@ -203,7 +203,7 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
         <b>活動地點</b>　國立台灣大學 綜合體育館（台北市大安區羅斯福路四段 1 號），請提前確認前往方式。<br>
         <b>當天攜帶</b>　運動服、室內運動鞋、水壺。球拍可自備，沒有的話現場也備有；羽球由營隊提供。<br>
         <b>彈性接送</b>　最早 08:00 送達、最晚 18:00 接回，三個時段皆適用，延長時段由教練在場照管，不另收費。<br>
-        <b>午餐</b>　整天班可代訂，五天共 $500（葷素可選），併入繳費通知金額；半天班不含午餐。<br>
+        <b>午餐</b>　整天班可代訂，四天共 $400（葷素可選），併入繳費通知金額；半天班不含午餐。<br>
         <b>紀念衫</b>　開營第一天發放。尺寸請把孩子現有的合身上衣平鋪測量，<b>不要量身體</b>。<br>
         <b>團體報名</b>　每位學員皆須個別填寫本表單，並在團報名單列出同行成員。
       </div>
@@ -219,7 +219,7 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
       <div class="fg full">
         <label for="session">報名梯次 <span class="req">*</span></label>
         <select id="session" name="session" required>
-          <option value="第一梯 2027/1/25–1/29">第一梯｜2027/1/25（一）– 1/29（五）</option>
+          <option value="第一梯 2027/1/25–1/28">第一梯｜2027/1/25（一）– 1/28（四）</option>
         </select>
       </div>
 
@@ -232,22 +232,22 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
           <input type="radio" name="slot" value="早上班（09:00–12:00）">
           <div class="slot-name">早上班</div>
           <div class="slot-time">09:00–12:00 半天</div>
-          <div class="slot-price">優惠價 $4,000</div>
-          <div class="slot-orig">原價 $4,250</div>
+          <div class="slot-price">優惠價 $3,150</div>
+          <div class="slot-orig">原價 $3,400</div>
         </label>
         <label class="slot-opt" data-slot="fullday">
           <input type="radio" name="slot" value="整天班（09:00–17:00）">
           <div class="slot-name">整天班</div>
           <div class="slot-time">09:00–17:00 含午休</div>
-          <div class="slot-price">優惠價 $8,000</div>
-          <div class="slot-orig">原價 $8,500</div>
+          <div class="slot-price">優惠價 $6,300</div>
+          <div class="slot-orig">原價 $6,800</div>
         </label>
         <label class="slot-opt" data-slot="afternoon">
           <input type="radio" name="slot" value="下午班（14:00–17:00）">
           <div class="slot-name">下午班</div>
           <div class="slot-time">14:00–17:00 半天</div>
-          <div class="slot-price">優惠價 $4,000</div>
-          <div class="slot-orig">原價 $4,250</div>
+          <div class="slot-price">優惠價 $3,150</div>
+          <div class="slot-orig">原價 $3,400</div>
         </label>
       </div>
 
@@ -358,8 +358,8 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
         <label class="lopt">
           <input type="radio" name="lunch" value="代訂午餐">
           <div>
-            <div class="lol">代訂營隊午餐　+$500／人</div>
-            <div class="los">五天共 $500（葷素可選），將併入繳費通知金額一併轉帳，無需另外準備現金</div>
+            <div class="lol">代訂營隊午餐　+$400／人</div>
+            <div class="los">四天共 $400（葷素可選），將併入繳費通知金額一併轉帳，無需另外準備現金</div>
           </div>
         </label>
         <div class="meal-type" id="mealType" style="display:none">
@@ -721,12 +721,12 @@ function estimateFee(d) {
   const hasStatus = early || d.discount === '團報' || d.discount === '台大教職員';
   const hasRef = !!(d.referrer && d.referrer !== '—');
   const full = d.slot === '整天班（09:00–17:00）';
-  const list = full ? 8500 : 4250;
+  const list = full ? 6800 : 3400;
   const step = full ? 500 : 250;
   const lines = [];
   if (hasStatus) lines.push([early ? '早鳥優惠（11/20 前報名）' : ('優惠身份（' + d.discount + '）'), -step]);
   const base = list - (hasStatus ? step : 0);
-  const meal = (full && d.lunch.indexOf('代訂') >= 0) ? 500 : 0;
+  const meal = (full && d.lunch.indexOf('代訂') >= 0) ? 400 : 0;
   return { list: list, base: base, meal: meal, transfer: base + meal,
            refundable: hasRef ? step : 0, referrer: d.referrer, lines: lines };
 }
@@ -774,7 +774,7 @@ function showPreview(d) {
         '<div style="font-size:11.5px;color:var(--text-muted);margin-bottom:.35rem">系統試算費用</div>' +
         '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-muted);padding:1px 0"><span>原價</span><span>' + f.list.toLocaleString() + '</span></div>' +
         feeLines +
-        (f.meal ? '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-muted);padding:1px 0"><span>代訂午餐（五天）</span><span>+500</span></div>' : '') +
+        (f.meal ? '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-muted);padding:1px 0"><span>代訂午餐（四天）</span><span>+400</span></div>' : '') +
         '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:.5rem;padding-top:.5rem;border-top:.5px solid rgba(224,123,31,.25)">' +
           '<span style="font-size:12.5px;color:var(--text-2);font-weight:600">應轉帳金額</span>' +
           '<span style="font-size:21px;font-weight:800;color:var(--accent-deep)">' + money(f.transfer) + '</span></div>' +

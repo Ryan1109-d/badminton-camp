@@ -31,19 +31,19 @@ const CONFIG = {
   SHEET_NAME: '報名名單',                 // 分頁名稱
   CAPACITY: 50,                          // 每個時段的正取上限（不是三時段合計）
   CAMP_NAME: '台灣大學羽球冬令營 2027',
-  CAMP_DATE: '2027/1/25（一）– 1/29（五）',
+  CAMP_DATE: '2027/1/25（一）– 1/28（四）',
   REPLY_EMAIL: 'stayyoung985@gmail.com',
   // 早鳥截止（含當日）。此日期前完成報名者，不限身份適用優惠價
   EARLY_BIRD_DEADLINE: '2026-11-20T23:59:59+08:00',
   // 定價（2026-08-17 起）。兩道折扣互相獨立、可以疊加：
   //   ① 優惠身份：早鳥 / 團報 / 台大教職員（三擇一，彼此不疊加）→ 轉帳時直接折抵
   //   ② 推薦人：報名表填了推薦人姓名 → 開課首日現場以現金退還，不先折抵
-  //   整天 8500 → 8000（身份）→ 7500（再退推薦 500）
-  //   半天 4250 → 4000（身份）→ 3750（再退推薦 250）
-  PRICE: { FULL: 8500, HALF: 4250, STEP_FULL: 500, STEP_HALF: 250 },
+  //   整天 6800 → 6300（身份）→ 5800（再退推薦 500）
+  //   半天 3400 → 3150（身份）→ 2900（再退推薦 250）
+  PRICE: { FULL: 6800, HALF: 3400, STEP_FULL: 500, STEP_HALF: 250 },
   // 個資保留期限。報名表上寫「活動結束後六個月內刪除」，這個值就是那個承諾的到期日
-  //（營期 1/29 結束 + 6 個月）。purgeOldData() 會拿它當刪除基準。
-  DATA_PURGE_AFTER: '2027-07-29T00:00:00+08:00',
+  //（營期 1/28 結束 + 6 個月）。purgeOldData() 會拿它當刪除基準。
+  DATA_PURGE_AFTER: '2027-07-28T00:00:00+08:00',
   // 全域流量上限：每分鐘最多幾筆報名。正常招生不可能超過，超過幾乎必然是腳本灌資料。
   MAX_SUBMITS_PER_MINUTE: 12,
   // 家長 LINE 社群邀請連結。⚠️ 真值只填在 Apps Script，不要 commit 進 public repo
@@ -572,7 +572,7 @@ function calcAmount(row) {
     breakdown.push((early ? '早鳥優惠' : '優惠身份（' + d + '）') + '　−NT$ ' + step);
   }
 
-  const meal = (fullDay && String(row[COL.LUNCH] || '').indexOf('代訂') >= 0) ? 500 : 0;
+  const meal = (fullDay && String(row[COL.LUNCH] || '').indexOf('代訂') >= 0) ? 400 : 0;
   return { listPrice: listPrice, base: base, meal: meal, total: base + meal,
            refundable: refundable, hasReferrer: hasReferrer, referrer: ref,
            slotLabel: fullDay ? '整天班' : '半天班', breakdown: breakdown,
@@ -594,7 +594,7 @@ ${CONFIG.CAMP_NAME} 已達開班標準，確定開班！
 梯次：${session}
 時段：${slot}（${amt.slotLabel}）
 原價：NT$ ${amt.listPrice}
-${amt.breakdown.length ? amt.breakdown.map(x => '　' + x).join('\n') + '\n' : ''}營隊費用：NT$ ${amt.base}${amt.meal ? '\n代訂午餐：NT$ ' + amt.meal + '（五天）' : ''}
+${amt.breakdown.length ? amt.breakdown.map(x => '　' + x).join('\n') + '\n' : ''}營隊費用：NT$ ${amt.base}${amt.meal ? '\n代訂午餐：NT$ ' + amt.meal + '（四天）' : ''}
 應繳總額：NT$ ${amt.total}
 ${amt.hasReferrer ? '\n── 推薦人優惠 ──\n您填寫的推薦人：' + amt.referrer + '\n經確認推薦人也完成報名後，可折抵 NT$ ' + amt.refundable + '。\n※ 這筆優惠「不含」在上方轉帳金額內，請先依上方總額轉帳。\n　 折抵金額將於「開課第一天」在報到處以現金退還，不需另外申請。\n' : ''}
 ── 轉帳資訊 ──
@@ -615,11 +615,11 @@ ${CONFIG.REPLY_EMAIL}`;
 
 /** 預覽：只寄一封範例信給自己，不讀 Sheet、不動任何資料 */
 function previewPaymentNotice() {
-  const amt = { listPrice: CONFIG.PRICE.FULL, base: 8000, meal: 500, total: 8500,
+  const amt = { listPrice: CONFIG.PRICE.FULL, base: 6300, meal: 400, total: 6700,
                 refundable: 500, hasReferrer: true, referrer: '陳小美（範例）',
                 slotLabel: '整天班', breakdown: ['早鳥優惠　−NT$ 500'],
                 label: '早鳥優惠價' };
-  const body = buildPaymentBody('王小華（範例）', '第一梯 2027/1/25–1/29',
+  const body = buildPaymentBody('王小華（範例）', '第一梯 2027/1/25–1/28',
                                 SLOT_FULL, amt);
   MailApp.sendEmail({
     to: CONFIG.REPLY_EMAIL,
@@ -944,7 +944,7 @@ function purgeOldData(reallyDelete) {
 // 取消開班通知（未達開班門檻時手動執行）
 // ══════════════════════════════════════════
 function sendCancelNotice(sessionName) {
-  if (!sessionName) throw new Error('請傳入梯次名稱，例如 sendCancelNotice("第一梯 2027/1/25–1/29")');
+  if (!sessionName) throw new Error('請傳入梯次名稱，例如 sendCancelNotice("第一梯 2027/1/25–1/28")');
   const sheet = getSheet_();
   const rows = sheet.getDataRange().getValues();
   let sent = 0;
