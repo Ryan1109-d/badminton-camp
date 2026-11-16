@@ -533,8 +533,47 @@ function jsonResponse(obj) {
  * doGet 保留給之後的後台（?admin）使用
  * 細節等後台設計討論時再實作
  */
+// ══════════════════════════════════════════
+// 版本指紋（2026-11-16 新增）
+//
+// 為什麼要這個：doGet 原本三站都回一樣的 'API alive'，所以「線上跑的是哪一版」
+// 從外面完全驗不出來。清大羽球因此從 8/29 一路跑第 13 版到 11/16 23:15，
+// 綁著舊 Sheet 與舊 LINE 群組，靠 3 筆真實報名掉進舊表才暴露。
+//
+// 改版 SOP：改完程式 → 把 SCRIPT_VERSION 改成當天日期 → 部署新版本。
+// 之後用瀏覽器打 /exec（GET）就能一眼看出：哪一版、幾欄、綁哪張 Sheet、LINE 連結對不對。
+//
+// 指紋是 SHA-256 的前 8 碼，不可逆 → 不會洩漏 Sheet ID 或 LINE 邀請連結本身。
+// doGet 是公開端點（誰可以存取＝所有人），所以這裡只放不敏感的值。
+// ══════════════════════════════════════════
+const SCRIPT_VERSION = '2026-11-16';
+
+/** 取字串的 SHA-256 前 8 碼（16 進位）。空值或仍是佔位字串回 'unset' */
+function fingerprint_(v) {
+  const s = String(v == null ? '' : v).trim();
+  if (!s || s.indexOf('YOUR_') === 0) return 'unset';
+  const bytes = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256, s, Utilities.Charset.UTF_8);
+  let hex = '';
+  for (let i = 0; i < 4; i++) {
+    hex += ('0' + (bytes[i] & 0xFF).toString(16)).slice(-2);
+  }
+  return hex;
+}
+
 function doGet(e) {
-  return jsonResponse({ status: 'ok', message: 'API alive' });
+  const out = {
+    status: 'ok',
+    message: 'API alive',
+    camp: CONFIG.CAMP_NAME,
+    version: SCRIPT_VERSION,
+    cols: EXPECTED_HEADERS.length,
+    sheetFp: fingerprint_(CONFIG.SHEET_ID),
+    lineFp: fingerprint_(CONFIG.LINE_GROUP_URL),
+    paymentLocked: paymentIsPlaceholder()
+  };
+  out.venueConfirmed = VENUE_CONFIRMED;
+  return jsonResponse(out);
 }
 
 // ══════════════════════════════════════════
