@@ -140,6 +140,24 @@ function seqInSlot_(slot, c) {
   return Math.max(c.amOcc, c.pmOcc) + 1;
 }
 
+
+/**
+ * 把剛寫入那一列的電話欄改成純文字並重寫一次。
+ *
+ * appendRow 走的是「使用者輸入」那套解析：'0912345678' 會被當成數字存成
+ * 912345678，開頭的 0 就不見了 —— 之後照 Sheet 打電話會少一碼，
+ * 保險名冊也會抄到錯號碼。所以寫完立刻把這幾格設成純文字格式再寫回去。
+ * 2026-11-18 由 11/18 那筆真實報名（934020456）發現。
+ */
+function writePhonesAsText_(sheet, row, clean) {
+  [
+    [COL.EMG_PHONE + 1, clean.emgPhone],
+    [COL.PAYER_PHONE + 1, clean.payerPhone]
+  ].forEach(function (c) {
+    sheet.getRange(row, c[0]).setNumberFormat('@').setValue(String(c[1]));
+  });
+}
+
 /**
  * 取得報名分頁。找不到時丟出「講得出原因」的錯誤，
  * 而不是讓後續程式碰到 null 之後噴 Cannot read properties of null。
@@ -425,6 +443,8 @@ function doPost(e) {
       clean.health, clean.healthDetail, clean.medical, clean.guardian,
       '', '', ''   // 繳費通知、行前通知、系統訊息
     ]);
+    // Sheets 會吃掉電話開頭的 0，寫完立刻把那幾格改成純文字再寫回去
+    writePhonesAsText_(sheet, sheet.getLastRow(), clean);
     const tWrite = Date.now();
     // ---- 寫入成功，此時才記錄冷卻與流量計數 ----
     cache.put(rateKey, '1', 600);
