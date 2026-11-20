@@ -10,11 +10,11 @@
         GitHub Pages 設不了，故未列入。 -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' https://www.googletagmanager.com;
+  script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
-  img-src 'self' data: https://res.cloudinary.com https://www.googletagmanager.com https://*.google-analytics.com;
-  connect-src 'self' https://script.google.com https://script.googleusercontent.com https://*.googleusercontent.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com;
+  img-src 'self' data: https://res.cloudinary.com https://www.googletagmanager.com https://*.google-analytics.com https://www.facebook.com;
+  connect-src 'self' https://script.google.com https://script.googleusercontent.com https://*.googleusercontent.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://www.facebook.com https://connect.facebook.net;
   form-action 'none';
   base-uri 'self';
   object-src 'none';
@@ -51,6 +51,34 @@
   window.gtag = function(){ window.dataLayer.push(arguments); };
   window.gtag('js', new Date());
   window.gtag('config', 'G-XP3DQR7BCT');
+})();
+</script>
+<!-- Meta Pixel（廣告成效追蹤）
+     ⚠️ 不傳任何個資：姓名、電話、信箱、學員資料一律不進 fbq。
+     ⚠️ 沿用上面 GA 那支的內部流量開關：網址加 ?ga_off=1 的裝置連 Pixel 也一起停
+        （我們自己天天逛網站，不擋會把成效數字灌壞）。要恢復：?ga_on=1
+     ⚠️ CSP 已同步放行 connect.facebook.net 與 www.facebook.com，改 CSP 時別刪掉 -->
+<script>
+(function(){
+  var KEY = 'sy_ga_off';
+  function hasFlag(){
+    if (new RegExp('(^|;\\s*)' + KEY + '=1').test(document.cookie)) return true;
+    try{ return localStorage.getItem(KEY) === '1'; }catch(e){ return false; }
+  }
+  if (hasFlag()) {                              // 內部裝置：不載入 Pixel
+    window.fbq = window.fbq || function(){};    // 留個空函式，呼叫端不必各自判斷
+    return;
+  }
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window,document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '2556852811454390');
+  fbq('track', 'PageView');
 })();
 </script>
 <title>台灣大學羽球冬令營 2027｜Stay Young</title>
@@ -337,6 +365,8 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
 </style>
 </head>
 <body>
+<noscript><img height="1" width="1" style="display:none" alt=""
+ src="https://www.facebook.com/tr?id=2556852811454390&amp;ev=PageView&amp;noscript=1"></noscript>
 <a class="promo-bar" href="#pricing"><span class="pb-dot"></span><b>早鳥優惠中</b>　11/20 前報名，不限身份自動享優惠價　·　再填推薦人，雙方各折 $500<span class="pb-go">看收費方案 →</span></a>
 <nav class="nav">
   <div class="nav-left">

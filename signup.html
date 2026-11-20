@@ -10,11 +10,11 @@
         GitHub Pages 設不了，故未列入。 -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' https://www.googletagmanager.com;
+  script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
-  img-src 'self' data: https://res.cloudinary.com https://www.googletagmanager.com https://*.google-analytics.com;
-  connect-src 'self' https://script.google.com https://script.googleusercontent.com https://*.googleusercontent.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com;
+  img-src 'self' data: https://res.cloudinary.com https://www.googletagmanager.com https://*.google-analytics.com https://www.facebook.com;
+  connect-src 'self' https://script.google.com https://script.googleusercontent.com https://*.googleusercontent.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://www.facebook.com https://connect.facebook.net;
   form-action 'none';
   base-uri 'self';
   object-src 'none';
@@ -53,6 +53,35 @@
   window.gtag = function(){ window.dataLayer.push(arguments); };
   window.gtag('js', new Date());
   window.gtag('config', 'G-XP3DQR7BCT');
+})();
+</script>
+<!-- Meta Pixel（廣告成效追蹤）
+     ⚠️ 不傳任何個資：姓名、電話、信箱、學員資料一律不進 fbq。
+     ⚠️ 沿用上面 GA 那支的內部流量開關：網址加 ?ga_off=1 的裝置連 Pixel 也一起停
+        （我們自己天天逛網站，不擋會把成效數字灌壞）。要恢復：?ga_on=1
+     ⚠️ CSP 已同步放行 connect.facebook.net 與 www.facebook.com，改 CSP 時別刪掉 -->
+<script>
+(function(){
+  var KEY = 'sy_ga_off';
+  function hasFlag(){
+    if (new RegExp('(^|;\\s*)' + KEY + '=1').test(document.cookie)) return true;
+    try{ return localStorage.getItem(KEY) === '1'; }catch(e){ return false; }
+  }
+  if (hasFlag()) {                              // 內部裝置：不載入 Pixel
+    window.fbq = window.fbq || function(){};    // 留個空函式，呼叫端不必各自判斷
+    return;
+  }
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window,document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '2556852811454390');
+  fbq('track', 'PageView');
+  fbq('track', 'InitiateCheckout');   // 進到報名頁就算一次
 })();
 </script>
 <style>
@@ -173,6 +202,8 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
 </style>
 </head>
 <body>
+<noscript><img height="1" width="1" style="display:none" alt=""
+ src="https://www.facebook.com/tr?id=2556852811454390&amp;ev=PageView&amp;noscript=1"></noscript>
 <nav class="nav">
   <div class="nav-left">
     <a class="nav-home" href="https://stayyounglab.com/" title="回到 Stay Young 首頁">
@@ -431,7 +462,7 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
       </div>
       <div class="fg full" style="background:var(--card-light);border:.5px solid var(--border-soft);border-radius:8px;padding:.9rem 1rem;font-size:12px;line-height:1.75;color:#4a5b6c;gap:0">
         <strong style="color:var(--text-2);font-weight:600">個人資料使用說明</strong>
-        <span style="margin-top:4px">本表單蒐集之個人資料，僅用於本營隊報名、聯繫、保險投保及活動安全管理，活動結束後六個月內刪除，不作其他用途。</span>
+        <span style="margin-top:4px">本表單蒐集之個人資料，僅用於本營隊報名、聯繫、保險投保及活動安全管理，活動結束後六個月內刪除，不作其他用途。本網站使用 Meta Pixel 等工具進行廣告成效分析，不會傳送您填寫的個人資料。</span>
       </div>
       </div>
 
@@ -732,6 +763,10 @@ form.addEventListener('submit', async (e) => {
     });
     const result = await res.json();
     if (result.status === 'ok') {
+      // Meta Pixel：**報名成功才算一筆 Lead**（送出失敗不觸發）。
+      // 只送營隊代號與系統試算金額，姓名／電話／信箱一律不送。
+      // 放在 alert 之前：alert 會擋住後面的跳轉，正好讓這支請求送得出去。
+      try { fbq('track', 'Lead', { content_name: 'ntu-badminton', value: estimateFee(data).transfer, currency: 'TWD' }); } catch (e) {}
       const msg = result.waitlist
         ? '報名成功！\n\n目前名額已滿，您已列入候補名單，有名額釋出時將以 email 通知。\n確認信已寄至您的信箱，請留意收件匣（含垃圾郵件夾）。'
         : '報名成功！\n\n確認信已寄至您的信箱，請留意收件匣（含垃圾郵件夾）。';
