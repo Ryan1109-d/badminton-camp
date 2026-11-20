@@ -256,7 +256,7 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
 
       <div class="fg full">
         <label>報名時段 <span class="req">*</span>　<span style="color:var(--text-faint);font-weight:400">價格為 優惠價 / 原價</span></label>
-        <span id="earlyBirdBadge" style="display:inline-block;align-self:flex-start;margin-top:2px;background:rgba(224,123,31,.1);border:.5px solid rgba(224,123,31,.45);color:var(--accent-deep);font-size:11.5px;font-weight:700;border-radius:5px;padding:4px 9px">早鳥優惠中 · 11/20（含）前報名，不限身份自動適用下方優惠價</span>
+        <span id="earlyBirdBadge" style="display:inline-block;align-self:flex-start;margin-top:2px;background:rgba(224,123,31,.1);border:.5px solid rgba(224,123,31,.45);color:var(--accent-deep);font-size:11.5px;font-weight:700;border-radius:5px;padding:4px 9px">早鳥優惠中 · 11/29（含）前報名，不限身份自動適用下方優惠價</span>
       </div>
       <div class="slot-pick" id="slotPick">
         <label class="slot-opt" data-slot="morning">
@@ -366,7 +366,7 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
           <option value="團報">5 人以上團報</option>
           <option value="台大教職員">台大教職員</option>
         </select>
-        <span id="promoNote" style="font-size:11px;color:var(--text-muted);margin-top:3px">2026/11/20（含）前完成報名，不限身份自動適用早鳥優惠價。以上三種身份擇一適用，彼此不可疊加。</span>
+        <span id="promoNote" style="font-size:11px;color:var(--text-muted);margin-top:3px">2026/11/29（含）前完成報名，不限身份自動適用早鳥優惠價。以上三種身份擇一適用，彼此不可疊加。</span>
       </div>
       <div class="fg full">
         <label for="referrer">推薦人姓名（選填）</label>
@@ -517,7 +517,7 @@ const msgBox = document.getElementById('formMsg');
 
 // 早鳥截止後，價格呈現自動改以原價為主（與首頁 index.html 同一套判定）
 // 註：此處僅影響「顯示」；實際收費由後端依報名時間計算，不受瀏覽器時鐘影響
-const EARLY_BIRD_END = new Date('2026-11-20T23:59:59+08:00');
+const EARLY_BIRD_END = new Date('2026-11-29T23:59:59+08:00');
 if (new Date() > EARLY_BIRD_END) {
   document.querySelectorAll('.slot-opt').forEach(opt => {
     const priceEl = opt.querySelector('.slot-price');   // 早鳥期間顯示「優惠價 $X」
@@ -791,7 +791,7 @@ form.addEventListener('submit', async (e) => {
 let previewConfirmed = false;
 
 function estimateFee(d) {
-  const EARLY_END = new Date('2026-11-20T23:59:59+08:00');
+  const EARLY_END = new Date('2026-11-29T23:59:59+08:00');
   const early = new Date() <= EARLY_END;
   const hasStatus = early || d.discount === '團報' || d.discount === '台大教職員';
   const hasRef = !!(d.referrer && d.referrer !== '—');
@@ -799,7 +799,7 @@ function estimateFee(d) {
   const list = full ? 6800 : 3400;
   const step = full ? 500 : 250;
   const lines = [];
-  if (hasStatus) lines.push([early ? '早鳥優惠（11/20 前報名）' : ('優惠身份（' + d.discount + '）'), -step]);
+  if (hasStatus) lines.push([early ? '早鳥優惠（11/29 前報名）' : ('優惠身份（' + d.discount + '）'), -step]);
   const base = list - (hasStatus ? step : 0);
   const meal = (full && d.lunch.indexOf('代訂') >= 0) ? 400 : 0;
   return { list: list, base: base, meal: meal, transfer: base + meal,

@@ -414,7 +414,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
 <body>
 <noscript><img height="1" width="1" style="display:none" alt=""
  src="https://www.facebook.com/tr?id=2556852811454390&amp;ev=PageView&amp;noscript=1"></noscript>
-<a class="promo-bar" href="#pricing"><span class="pb-dot"></span><b>早鳥優惠中</b>　11/20 前報名，不限身份自動享優惠價　·　再填推薦人，雙方各折 $500<span class="pb-go">看收費方案 →</span></a>
+<a class="promo-bar" href="#pricing"><span class="pb-dot"></span><b>早鳥優惠中</b>　11/29 前報名，不限身份自動享優惠價　·　再填推薦人，雙方各折 $500<span class="pb-go">看收費方案 →</span></a>
 <nav class="nav">
   <div class="nav-left">
     <a class="nav-home" href="https://stayyounglab.com/" title="回到 Stay Young 首頁">
@@ -563,7 +563,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
       <div class="discount-note">早上班 09:00–12:00　·　下午班 14:00–17:00　·　整天班 09:00–17:00（含午休）　·　價格為每人四天全程</div>
     </div>
     <div class="promo-note reveal">
-      <span id="promoList"><b>優惠身份共三種，擇一適用，彼此不可併用：</b>早鳥（11/20 前完成報名，系統自動適用）／台大教職員子女／團體報名（5 人以上，各自完成報名）。</span>
+      <span id="promoList"><b>優惠身份共三種，擇一適用，彼此不可併用：</b>早鳥（11/29 前完成報名，系統自動適用）／台大教職員子女／團體報名（5 人以上，各自完成報名）。</span>
     </div>
     <div class="referral-hero reveal">
       <span class="rh-badge">兩人同享 · 可疊加</span>
@@ -644,7 +644,7 @@ footer{background:var(--navy-deep);padding:1.9rem 1.75rem;display:flex;justify-c
 <section class="cta-band">
   <div class="reveal">
     <h2 class="st">準備好讓孩子上場了嗎？</h2>
-    <p>限額 50 名，滿 15 人即確定開班。早鳥 11/20 截止，報名截止 2027/1/10（日），額滿候補。</p>
+    <p>限額 50 名，滿 15 人即確定開班。早鳥 11/29（日）截止，報名截止 2027/1/10（日），額滿候補。</p>
     <a class="btn-blue" href="signup.html">前往報名 →</a>
   </div>
 </section>
@@ -680,16 +680,16 @@ const io = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 // 早鳥截止後，更新優惠身份說明（價格表三段固定顯示，不需對調）
 // 註：此處僅影響「顯示」；實際收費由後端依報名時間計算，不受瀏覽器時鐘影響
-const EARLY_BIRD_END = new Date('2026-11-20T23:59:59+08:00');
+const EARLY_BIRD_END = new Date('2026-11-29T23:59:59+08:00');
 if (new Date() > EARLY_BIRD_END) {
   const pl = document.getElementById('promoList');
-  if (pl) pl.innerHTML = '<b>優惠身份共兩種，擇一適用，彼此不可併用：</b>台大教職員子女／團體報名（5 人以上，各自完成報名）。早鳥優惠已於 11/20 截止。';
+  if (pl) pl.innerHTML = '<b>優惠身份共兩種，擇一適用，彼此不可併用：</b>台大教職員子女／團體報名（5 人以上，各自完成報名）。早鳥優惠已於 11/29 截止。';
   const ps = document.getElementById('promoSub');
   if (ps) ps.textContent = '台大教職員子女／團報，擇一';
   // FAQ「優惠可以一起用嗎」：早鳥過後從三種改成兩種，並說明早鳥已截止，
   // 免得家長看到早鳥還列在裡面以為現在仍能申請。
   const fs = document.getElementById('faqStack');
-  if (fs) fs.textContent = '不好意思，優惠沒辦法疊加喔。台大教職員、團報，只要符合其中任何一種就享同一個優惠價，不會因為同時符合兩種而更便宜，這點要請您見諒。早鳥優惠已於 11/20 截止。';
+  if (fs) fs.textContent = '不好意思，優惠沒辦法疊加喔。台大教職員、團報，只要符合其中任何一種就享同一個優惠價，不會因為同時符合兩種而更便宜，這點要請您見諒。早鳥優惠已於 11/29 截止。';
 }
 // 場地照片放大檢視
 const lb=document.getElementById('lightbox'),lbImg=document.getElementById('lightboxImg'),lbCap=document.getElementById('lightboxCap');
@@ -721,7 +721,7 @@ document.querySelectorAll('.faq-q').forEach((btn, i) => {
 <script>
 // 早鳥截止後自動移除頂部橫幅（僅影響顯示；實際收費由後端依報名時間判定）
 (function(){
-  var end = new Date('2026-11-20T23:59:59+08:00');
+  var end = new Date('2026-11-29T23:59:59+08:00');
   if (new Date() > end) {
     var b = document.querySelector('.promo-bar');
     if (b) b.parentNode.removeChild(b);
