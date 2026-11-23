@@ -470,7 +470,7 @@ footer{background:var(--accent-deep);padding:1.9rem 1.75rem;display:flex;justify
         <div class="notice-title">報名後流程說明</div>
         <div class="notice-text">送出報名後，您會先收到「報名確認信」。待報名人數達開班標準並確認開班後，我們才會寄送「繳費通知」，屆時再依通知的帳號完成轉帳繳費即可。開班前不會收取任何費用。</div>
       </div>
-      <p class="fnote">報名截止：2027/1/10（日）。額滿後自動進入候補名單，有名額釋出時以 email 通知。退費規則詳見<a href="index.html#pricing">首頁收費方案區</a>。</p>
+      <p class="fnote">報名截止：2027/1/10（日）。報名期間內一律正取，不會列候補。退費規則詳見<a href="index.html#pricing">首頁收費方案區</a>。</p>
       <div class="msg" id="formMsg" role="status" aria-live="polite"></div>
       <button type="submit" class="fsub" id="submitBtn">送出報名 →</button>
     </form>
@@ -767,6 +767,9 @@ form.addEventListener('submit', async (e) => {
       // 只送營隊代號與系統試算金額，姓名／電話／信箱一律不送。
       // 放在 alert 之前：alert 會擋住後面的跳轉，正好讓這支請求送得出去。
       try { fbq('track', 'Lead', { content_name: 'ntu-badminton', value: estimateFee(data).transfer, currency: 'TWD' }); } catch (e) {}
+      // 2026-11-23 起後端 WAITLIST_ENABLED=false，result.waitlist 永遠 false，
+      // 所以下面那行候補文案平常不會出現。故意留著當保險：萬一哪天後端恢復候補制
+      // 而前端沒跟著改，家長看到的會是誠實的候補說明，而不是被騙成正取。
       const msg = result.waitlist
         ? '報名成功！\n\n目前名額已滿，您已列入候補名單，有名額釋出時將以 email 通知。\n確認信已寄至您的信箱，請留意收件匣（含垃圾郵件夾）。'
         : '報名成功！\n\n確認信已寄至您的信箱，請留意收件匣（含垃圾郵件夾）。';

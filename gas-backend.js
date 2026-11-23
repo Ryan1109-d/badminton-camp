@@ -19,21 +19,25 @@
  *    - 誰可以存取：所有人
  * 5. 複製 Web App URL，貼到 signup.html 的 GAS_URL
  *
- * 狀態欄位邏輯（2026-08-21 改為以「時段」為單位，不再是三時段合計）：
- * - 名額以時段計算，每個時段上限 CONFIG.CAPACITY 人。
- * - 整天班同時佔用早上與下午兩個時段的名額。
- *   因此早上佔用 = 早上班 + 整天班；下午佔用 = 下午班 + 整天班。
- * - 報名時段還有空位 → 狀態「正取」，寄報名確認信
- * - 報名時段已額滿   → 狀態「候補」，寄候補通知信
- *   （報整天班時，只要早上或下午其中一邊滿了就是候補）
+ * 狀態欄位邏輯（2026-11-23 起：不設報名上限，一律正取）：
+ * - 報名期間內，任何時段、任何人數，狀態一律「正取」，寄報名確認信。
+ *   Ryan 2026-11-23 決定：台大不是只能借 5 面，12/25 前場地還沒定案，
+ *   需要就加借 → 沒有理由因為某個時段人多就把家長推進候補。
+ * - CONFIG.WAITLIST_ENABLED = false 就是這件事的開關（要恢復候補制改回 true）。
+ * - CONFIG.CAPACITY 不再是報名上限，只留作「每滿這個數要加人力／加場地」的規劃參考值。
  *
- * 為什麼要這樣改：場地在同一個時間點最多容納 CAPACITY 人，
- * 早上與下午是兩批不同的人，本來就該分開算。舊版三時段合計會過早把人推進候補。
+ * 佔用數還是照時段算（整天班同時佔早上與下午）：
+ *   早上佔用 = 早上班 + 整天班；下午佔用 = 下午班 + 整天班。
+ *   這個數字用在通知信與 checkSetup()，讓自己知道哪個時段擠、該加幾位教練幾面場地。
  */
 const CONFIG = {
   SHEET_ID: 'YOUR_SHEET_ID_HERE',       // TODO: 換成實際 Sheet ID（只在 Apps Script 填，不要 commit）
   SHEET_NAME: '報名名單',                 // 分頁名稱
-  CAPACITY: 50,                          // 每個時段的正取上限（不是三時段合計）
+  // ⚠️ 2026-11-23 起 CAPACITY 不是報名上限，只是規劃參考值（每滿 10 人加 1 位教練、加借 1 面場地）。
+  CAPACITY: 50,
+  // 候補制開關。false＝不論多少人一律正取（Ryan 2026-11-23 決定，台大場地可加借）。
+  // 改回 true 就恢復「時段額滿轉候補」，候補信與遞補通知的程式都還留著。
+  WAITLIST_ENABLED: false,
   CAMP_NAME: '台灣大學羽球冬令營 2027',
   CAMP_DATE: '2027/1/25（一）– 1/28（四）',
   REPLY_EMAIL: 'stayyoung985@gmail.com',
@@ -125,8 +129,9 @@ function countSlots_(rows) {
   return { am: am, pm: pm, full: full, amOcc: am + full, pmOcc: pm + full };
 }
 
-/** 報這個時段會不會變成候補 */
+/** 報這個時段會不會變成候補。WAITLIST_ENABLED=false 時永遠 false（一律正取） */
 function isWaitlisted_(slot, c) {
+  if (!CONFIG.WAITLIST_ENABLED) return false;
   if (slot === SLOT_AM)   return c.amOcc >= CONFIG.CAPACITY;
   if (slot === SLOT_PM)   return c.pmOcc >= CONFIG.CAPACITY;
   // 整天班要兩邊都有位子才排得進去
@@ -203,9 +208,11 @@ function checkSetup() {
       out.push('   目前資料筆數：' + n);
       if (n > 0) {
         const c = countSlots_(sheet.getDataRange().getValues());
-        out.push('   正取佔用｜早上 ' + c.amOcc + '／' + CONFIG.CAPACITY +
-                 '　下午 ' + c.pmOcc + '／' + CONFIG.CAPACITY +
+        out.push('   正取佔用｜早上 ' + c.amOcc + '　下午 ' + c.pmOcc +
                  '　（早上班 ' + c.am + '、下午班 ' + c.pm + '、整天班 ' + c.full + '）');
+        out.push('   ' + (CONFIG.WAITLIST_ENABLED
+          ? '候補制：開（每時段上限 ' + CONFIG.CAPACITY + '）'
+          : '候補制：關，一律正取（人力／場地參考：每時段每 10 人需 1 位教練、1 面場地）'));
       }
     }
   } catch (e) {
@@ -250,8 +257,9 @@ function notifyOwner_(data, clean, status, seq, counts) {
   const body =
     CONFIG.CAMP_NAME + '\n' +
     '─────────────────\n' +
-    '狀態：' + status + '（該時段第 ' + seq + ' 位，每時段上限 ' + CONFIG.CAPACITY +
-      '｜早上 ' + counts.amOcc + '、下午 ' + counts.pmOcc + '）\n' +
+    '狀態：' + status + '（該時段第 ' + seq + ' 位｜早上 ' + counts.amOcc +
+      '、下午 ' + counts.pmOcc + (CONFIG.WAITLIST_ENABLED
+        ? '，每時段上限 ' + CONFIG.CAPACITY : '，不設上限') + '）\n' +
     '梯次：' + dash(data.session) + '\n' +
     '時段：' + dash(data.slot) + '\n' +
     '─────────────────\n' +
@@ -566,7 +574,7 @@ function jsonResponse(obj) {
 // 指紋是 SHA-256 的前 8 碼，不可逆 → 不會洩漏 Sheet ID 或 LINE 邀請連結本身。
 // doGet 是公開端點（誰可以存取＝所有人），所以這裡只放不敏感的值。
 // ══════════════════════════════════════════
-const SCRIPT_VERSION = '2026-11-16';
+const SCRIPT_VERSION = '2026-11-23';
 
 /** 取字串的 SHA-256 前 8 碼（16 進位）。空值或仍是佔位字串回 'unset' */
 function fingerprint_(v) {
@@ -593,6 +601,7 @@ function doGet(e) {
     paymentLocked: paymentIsPlaceholder()
   };
   out.venueConfirmed = VENUE_CONFIRMED;
+  out.waitlist = CONFIG.WAITLIST_ENABLED;
   return jsonResponse(out);
 }
 
