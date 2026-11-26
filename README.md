@@ -35,7 +35,7 @@ https://ntu-badminton.stayyounglab.com ｜ 隸屬 [Stay Young](https://stayyoung
 | 報名截止 | 2027/1/10（日） |
 | 繳費期限 | 收到繳費通知後 7 天（`PAYMENT.DEADLINE_DAYS`） |
 | 保險 | 站上宣稱「全程責任保險」 |
-| 聯絡 | stayyoung985@gmail.com ／ 0979-032-572 |
+| 聯絡 | stayyoung985@gmail.com ／ LINE 官方帳號 https://lin.ee/74XmVvJ |
 
 **退費**：開課 15 天前全額｜前 6–14 天 90%｜前 5 天內 70%｜開課後不退。
 
