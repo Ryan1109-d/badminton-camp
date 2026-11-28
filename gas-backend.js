@@ -19,12 +19,13 @@
  *    - 誰可以存取：所有人
  * 5. 複製 Web App URL，貼到 signup.html 的 GAS_URL
  *
- * 狀態欄位邏輯（2026-11-23 起：不設報名上限，一律正取）：
- * - 報名期間內，任何時段、任何人數，狀態一律「正取」，寄報名確認信。
- *   Ryan 2026-11-23 決定：台大不是只能借 5 面，12/25 前場地還沒定案，
- *   需要就加借 → 沒有理由因為某個時段人多就把家長推進候補。
- * - CONFIG.WAITLIST_ENABLED = false 就是這件事的開關（要恢復候補制改回 true）。
- * - CONFIG.CAPACITY 不再是報名上限，只留作「每滿這個數要加人力／加場地」的規劃參考值。
+ * 狀態欄位邏輯（2026-11-28 起：每時段上限 50，第 51 人起備取）：
+ * - Ryan 2026-11-28 決定，取代 11/23 的「不設上限、一律正取」。
+ *   上午時段（整天班＋早上班）與下午時段（整天班＋下午班）各上限 CONFIG.CAPACITY＝50，
+ *   超過就把狀態寫「候補」，並在信裡建議改報還有名額的那個時段。
+ * - CONFIG.WAITLIST_ENABLED = true 就是這件事的開關（要回到一律正取改回 false）。
+ * - ⚠️ 家長看到的字一律用「**備取**」；Sheet 的狀態值維持「候補」（舊資料、
+ *   sendPaymentNotice() 只挑「正取」、sendPromotionNotice() 都靠這個值，不要改）。
  *
  * 佔用數還是照時段算（整天班同時佔早上與下午）：
  *   早上佔用 = 早上班 + 整天班；下午佔用 = 下午班 + 整天班。
@@ -33,11 +34,12 @@
 const CONFIG = {
   SHEET_ID: 'YOUR_SHEET_ID_HERE',       // TODO: 換成實際 Sheet ID（只在 Apps Script 填，不要 commit）
   SHEET_NAME: '報名名單',                 // 分頁名稱
-  // ⚠️ 2026-11-23 起 CAPACITY 不是報名上限，只是規劃參考值（每滿 10 人加 1 位教練、加借 1 面場地）。
+  // 每個時段的正取上限（2026-11-28 起恢復為報名上限）。
+  // 上午佔用＝整天班＋早上班；下午佔用＝整天班＋下午班；兩邊各自判定。
   CAPACITY: 50,
-  // 候補制開關。false＝不論多少人一律正取（Ryan 2026-11-23 決定，台大場地可加借）。
-  // 改回 true 就恢復「時段額滿轉候補」，候補信與遞補通知的程式都還留著。
-  WAITLIST_ENABLED: false,
+  // 候補制開關。true＝超過 CAPACITY 就列候補（Ryan 2026-11-28 決定）。
+  // 2026-11-23～11-28 之間是 false（一律正取），改回 false 就回到那個行為。
+  WAITLIST_ENABLED: true,
   CAMP_NAME: '台灣大學羽球冬令營 2027',
   CAMP_DATE: '2027/1/25（一）– 1/28（四）',
   REPLY_EMAIL: 'stayyoung985@gmail.com',
@@ -459,7 +461,7 @@ function doPost(e) {
     cache.put(minuteKey, String(inThisMinute + 1), 120);
     // ---- 寄信：失敗不得讓家長看到「送出失敗」 ----
     try {
-      if (isWaitlist) { sendWaitlistEmail(data); } else { sendConfirmEmail(data); }
+      if (isWaitlist) { sendWaitlistEmail(data, clean, counts); } else { sendConfirmEmail(data); }
     } catch (mailErr) {
       sheet.getRange(sheet.getLastRow(), SYSMSG_COL)
            .setValue('寄信失敗：' + safeCell(mailErr.message, 200));
@@ -527,19 +529,60 @@ ${CONFIG.REPLY_EMAIL}`;
     name: 'Stay Young 台灣大學羽球冬令營'
   });
 }
-/** 候補通知信（額滿後） */
-function sendWaitlistEmail(data) {
-  const subject = `【${CONFIG.CAMP_NAME}】候補登記通知`;
+/**
+ * 哪一個時段把這筆報名擠成候補，以及另一個時段還有沒有名額。
+ *
+ * 回傳 { fullLabel, otherSlot }：
+ *   fullLabel ＝ 要跟家長說「已經額滿」的那個時段（「上午」或「下午」）
+ *   otherSlot ＝ 還有名額、可以建議家長改報的半天班全名；兩邊都滿就是 null
+ * 整天班同時佔早上與下午，所以兩邊只要有一邊滿就會候補；
+ * 這時建議改報的是「還沒滿的那個半天」。
+ */
+function waitlistContext_(slot, c) {
+  const amFull = c.amOcc >= CONFIG.CAPACITY;
+  const pmFull = c.pmOcc >= CONFIG.CAPACITY;
+  if (slot === SLOT_AM) {
+    return { fullLabel: '上午', otherSlot: pmFull ? null : SLOT_PM };
+  }
+  if (slot === SLOT_PM) {
+    return { fullLabel: '下午', otherSlot: amFull ? null : SLOT_AM };
+  }
+  // 整天班
+  if (amFull && pmFull) return { fullLabel: '上午與下午', otherSlot: null };
+  if (amFull)           return { fullLabel: '上午', otherSlot: SLOT_PM };
+  return { fullLabel: '下午', otherSlot: SLOT_AM };
+}
+
+/**
+ * 候補通知信（某個時段額滿）。文案為 Ryan 2026-11-28 核准的版本。
+ * ⚠️ 對家長一律說「備取」，不要說「候補」（Sheet 的狀態值才是「候補」）。
+ * counts 可以省略（預覽時），省略就不附「改報另一時段」那段。
+ */
+function sendWaitlistEmail(data, clean, counts) {
+  const name = safeText(data.studentName, 20);
+  const slotText = safeText(data.slot, 40);
+  const ctx = counts ? waitlistContext_(String((clean && clean.slot) || data.slot).trim(), counts)
+                     : { fullLabel: '該', otherSlot: null };
+  const subject = `【${CONFIG.CAMP_NAME}】報名確認（備取）`;
+  // 用時段常數的全名（「下午班（14:00–17:00）」），夾在句子裡讀得順，
+  // 也剛好跟報名表上的選項字一模一樣，家長要改時段時不會對不上。
+  const otherText = ctx.otherSlot ? String(ctx.otherSlot) : '';
+  // 整天班改半天班是「換方案」，費用會從全天價變半天價 —— 這句一定要講，
+  // 不能讓家長答應之後才在繳費通知上看到金額變了。半天換半天則同價，不用提。
+  const feeNote = (ctx.otherSlot && String((clean && clean.slot) || data.slot).trim() === SLOT_FULL)
+    ? '（改成半天班後，費用也會按半天班計）' : '';
+  const switchPara = ctx.otherSlot
+    ? `\n另外提供一個選擇：${otherText}目前還有名額，課程一樣從基本練習帶到實戰，接送時間也有彈性。\n若方便，回信告訴我們，我們就幫您改成${otherText}，直接列為正取${feeNote}。\n當然，如果還是想等，維持備取也完全沒問題。\n`
+    : '';
   const body =
 `您好：
-感謝您為 ${safeText(data.studentName,20)} 報名 ${CONFIG.CAMP_NAME}（${safeText(data.session,40)}／${safeText(data.slot,40)}）。
-目前該時段正取名額已滿，您的報名已列入「候補名單」。
-若有名額釋出，我們將立即以 email 通知您，屆時再依信中說明完成報名程序即可。
-候補期間不會收取任何費用。
 
-※ 其他時段可能仍有名額。若您的時間允許調整，歡迎回覆本信告知，
-　 我們可協助改到還有空位的時段。
+感謝您為 ${name} 報名 ${CONFIG.CAMP_NAME}（${safeText(data.session,40)}）。
 
+${ctx.fullLabel}時段目前已經額滿，所以 ${name} 的${slotText}報名會先列為備取。
+之後如果有正取家長沒有在期限內完成繳費，我們會依報名順序通知備取的家長遞補。
+備取期間不會收取任何費用。
+${switchPara}
 若有任何問題，歡迎直接回覆本信。
 Stay Young 台灣大學羽球冬令營
 ${CONFIG.REPLY_EMAIL}`;
@@ -550,6 +593,27 @@ ${CONFIG.REPLY_EMAIL}`;
     replyTo: CONFIG.REPLY_EMAIL,
     name: 'Stay Young 台灣大學羽球冬令營'
   });
+}
+
+/**
+ * 預覽備取信：只寄一封範例給自己，不讀 Sheet、不動任何資料、不送測試報名。
+ * 三種情境各寄一封，確認文案與「改報另一時段」那段的開關都對。
+ */
+function previewWaitlistEmail() {
+  const sample = { studentName: '王小華（範例）', session: '2027/1/25–1/28',
+                   email: CONFIG.REPLY_EMAIL };
+  const cases = [
+    ['上午滿、下午還有位', SLOT_AM,   { amOcc: 50, pmOcc: 26 }],
+    ['下午滿、上午還有位', SLOT_PM,   { amOcc: 40, pmOcc: 50 }],
+    ['整天班，兩邊都滿',   SLOT_FULL, { amOcc: 50, pmOcc: 50 }]
+  ];
+  cases.forEach(function (cs) {
+    const d = { studentName: sample.studentName, session: sample.session,
+                slot: cs[1], email: sample.email };
+    sendWaitlistEmail(d, { slot: cs[1] }, cs[2]);
+  });
+  return '已寄出 3 封預覽備取信到 ' + CONFIG.REPLY_EMAIL +
+         '\n（情境：' + cases.map(function (c) { return c[0]; }).join('／') + '）';
 }
 /** 統一 JSON 回應 */
 function jsonResponse(obj) {
@@ -574,7 +638,7 @@ function jsonResponse(obj) {
 // 指紋是 SHA-256 的前 8 碼，不可逆 → 不會洩漏 Sheet ID 或 LINE 邀請連結本身。
 // doGet 是公開端點（誰可以存取＝所有人），所以這裡只放不敏感的值。
 // ══════════════════════════════════════════
-const SCRIPT_VERSION = '2026-11-23';
+const SCRIPT_VERSION = '2026-11-28';
 
 /** 取字串的 SHA-256 前 8 碼（16 進位）。空值或仍是佔位字串回 'unset' */
 function fingerprint_(v) {
@@ -602,6 +666,8 @@ function doGet(e) {
   };
   out.venueConfirmed = VENUE_CONFIRMED;
   out.waitlist = CONFIG.WAITLIST_ENABLED;
+  // 每時段上限。名額規則是公開資訊，放這裡是為了讓「線上跑哪一版規則」驗得出來。
+  out.capacity = CONFIG.CAPACITY;
   return jsonResponse(out);
 }
 
